@@ -10,11 +10,20 @@ const port = process.env.PORT;
 
 app.use(express.json()); // Add this line to parse JSON data in the request body
 
-app.use(cors());
+app.use(cors({ origin: "*" })); // configure CORS to allow all origins, methods, and headers
+
+app.options('/piece', (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.sendStatus(200);
+  });
+  
 
 app.get('/board', (req, res) => {
     const board = copyBoard();
     res.send(JSON.stringify(board));
+    return;
 })
 
 // function to validate request-body-params 
@@ -37,7 +46,10 @@ function validate(req, res) {
     return 1;
 }
 
-app.post('/', (req, res) => {
+
+app.options('/piece', cors()); // Set up pre-flight OPTIONS request handling
+
+app.post('/piece', (req, res) => {
 
     // console.log('req.body:', req.body); // add this line to debug
 
@@ -49,15 +61,24 @@ app.post('/', (req, res) => {
 
         // instead of if-else... use try-catch
         if (updateBoard(player, xPos, yPos) === 1) {
-            const board = copyBoard();
-            console.log(board);
-            res.sendStatus(200);
+            console.log("POST - updateBoard worked in controller");
+           // console.log(board);
+           res.status(200).json({ board: copyBoard() });
+
+        } 
+        // there's already a piece there 
+        else if (updateBoard(player, xPos, yPos) === 2) {
+            return; 
         } else {
             console.log("Failure updating board!");
-            res.sendStatus(400);
+            res.sendStatus(400).json(
+                "error in updateBoard() of POST"
+            );
+            
         }
     } else {
         res.status(400).json({ error: "Invalid request parameters" });
+        
 
     }
 

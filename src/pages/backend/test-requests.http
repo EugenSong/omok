@@ -1,11 +1,11 @@
 ### Request 1: Create an exercise
-POST http://localhost:8000/ HTTP/1.1
+POST http://localhost:8000/piece HTTP/1.1
 content-type: application/json
 
 {
     "player": 2,
     "x": 1, 
-    "y": 2
+    "y": 4
 }
 
 

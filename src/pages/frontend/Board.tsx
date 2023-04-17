@@ -1,8 +1,9 @@
 import React from 'react';
 import styles from '@/styles/Home.module.css';
 import { useState, useEffect } from 'react';
-
 import Cell from '../components/Cell';
+import Message from '../components/Label';
+import checkWin from './winningLogic';
 
 
 interface GridProps {
@@ -10,91 +11,16 @@ interface GridProps {
   numCols: number;
 }
 
-interface LabelProps {
-  message: string;
-
-}
-
-// check if player win after each placed piece
-const checkWin = (board: string[][], player: string): boolean => {
-  const numRows = board.length;
-  const numCols = board[0].length;
-  for (let row = 0; row < numRows; row++) {
-    for (let col = 0; col < numCols; col++) {
-      if (col <= numCols - 5) {
-        // Check horizontal line
-        if (
-          board[row][col] === player &&
-          board[row][col + 1] === player &&
-          board[row][col + 2] === player &&
-          board[row][col + 3] === player &&
-          board[row][col + 4] === player
-        ) {
-          return true;
-        }
-      }
-      if (row <= numRows - 5) {
-        // Check vertical line
-        if (
-          board[row][col] === player &&
-          board[row + 1][col] === player &&
-          board[row + 2][col] === player &&
-          board[row + 3][col] === player &&
-          board[row + 4][col] === player
-        ) {
-          return true;
-        }
-        if (col <= numCols - 5) {
-          // Check diagonal line (top-left to bottom-right)
-          if (
-            board[row][col] === player &&
-            board[row + 1][col + 1] === player &&
-            board[row + 2][col + 2] === player &&
-            board[row + 3][col + 3] === player &&
-            board[row + 4][col + 4] === player
-          ) {
-            return true;
-          }
-        }
-        if (col >= 4) {
-          // Check diagonal line (top-right to bottom-left)
-          if (
-            board[row][col] === player &&
-            board[row + 1][col - 1] === player &&
-            board[row + 2][col - 2] === player &&
-            board[row + 3][col - 3] === player &&
-            board[row + 4][col - 4] === player
-          ) {
-            return true;
-          }
-        }
-      }
-    }
-  }
-  return false;
-};
-
-
-
-
-const Label = ( { message }: LabelProps) => {
-  return (
-    <p>{message}</p>
-  )
-}
 
 // Grid html skeleton
 const Grid = ({ numRows, numCols }: GridProps) => {
 
 const [api_board, setApiBoard] = useState([]); 
 
-useEffect(() => {
-  console.log(api_board);
-}, [api_board]);
-
+// asyncronously fetch data - Works!!! 
 const loadBoard = async () => {
 
-  // use utility and awesome fetch() to receive data 
+  // use utility and awesome fetch api to get data 
   const response = await fetch('http://localhost:8000/board');
 
   // conv to json - don't forget await since promise
@@ -102,11 +28,38 @@ const loadBoard = async () => {
 
   // fill state board using fetched data 
   setApiBoard(response_data);
-
 }
 
-loadBoard();
+const placePiece = async (playerPiece: number, rowIndex: number, colIndex: number) => {
+  try {
+  const response = await fetch('http://localhost:8000/piece', {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({player: playerPiece, x: rowIndex, y: colIndex}),
+  });
 
+    const result = await response.json();
+    console.log("Success: Response is ", result); 
+   //   setApiBoard(updatedBoard);
+  } catch (error) {
+    console.log("Error is: ", error); 
+  }
+  
+  };
+
+
+
+/*
+
+// annoying way to console log
+useEffect(() => {
+  console.log("api board", api_board);
+  loadBoard();
+}, [api_board]);
+
+*/
 
   // create a board state to pass as parameter later into
   const [board, setBoard] = useState<string[][]>(
@@ -119,6 +72,16 @@ loadBoard();
   const [p1Turn, setP1Turn] = useState<boolean>(true);
 
   let player = '';
+
+  // reset board
+  const resetBoard = () => {
+
+    setBoard(
+      Array(numRows)
+        .fill(null)
+        .map(() => Array(numCols).fill(''))
+    );
+  }
 
   // handle each player's piece in Grid
   const handleClick = (rowIndex: number, colIndex: number) => {
@@ -186,24 +149,24 @@ loadBoard();
   };
 
   // fill each outer array with html row
-  const rows = [];
+  const rows = []; 
   for (let rowIndex = 0; rowIndex < numRows; rowIndex++) {
     rows.push(renderRow(rowIndex));
   }
 
   return (
     <div>
-      <Label message="This is label message"/>
+      <Message message="This is label message"/>
       <table className={styles.grid}>
         <tbody>{rows}</tbody>
       </table>
 
-      {/* how to set parameters and create a clear button */}
-      <button onClick={() => setBoard(
-          Array(numRows)
-            .fill(null)
-            .map(() => Array(numCols).fill(''))
-        )}>Clear board</button>
+      {/* remove later...client cannot reset board - just there for testing purposes */}
+      <button onClick={() => resetBoard()}>Clear board</button>
+
+      <div>
+      <button onClick={() => placePiece(2, 0, 5)}>Post piece to board api</button>
+      </div>
     </div>
   );
 };

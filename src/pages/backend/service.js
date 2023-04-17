@@ -26,6 +26,9 @@ const updateBoard = (playerPiece, xPos, yPos) => {
         board[xPos][yPos] = playerPiece;
         return 1;
     }
+
+    else if ( (xPos >= 0 && xPos < board.length && yPos >= 0 && yPos < board[0].length) && (board[xPos][yPos] === 1 || board[xPos][yPos] === 2) ) return 2;
+
     return 0;
 }
 
