@@ -12,6 +12,7 @@ app.use(express.json()); // Add this line to parse JSON data in the request body
 
 app.use(cors({ origin: "*" })); // configure CORS to allow all origins, methods, and headers
 
+// handle OPTIONS request that occurs orior to POST - due to CORS protocol
 app.options('/piece', (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST');
@@ -59,12 +60,11 @@ app.post('/piece', (req, res) => {
         const xPos = req.body.x
         const yPos = req.body.y
 
-        // instead of if-else... use try-catch
+        // update board with player piece
         if (updateBoard(player, xPos, yPos) === 1) {
             console.log("POST - updateBoard worked in controller");
            // console.log(board);
            res.status(200).json({ board: copyBoard() });
-
         } 
         // there's already a piece there 
         else if (updateBoard(player, xPos, yPos) === 2) {

@@ -1,7 +1,7 @@
 
 
 // check player win after each placed piece
-const checkWin = (board: string[][], player: string): boolean => {
+const checkWin = (board: number[][], player: number): boolean => {
     const numRows = board.length;
     const numCols = board[0].length;
     for (let row = 0; row < numRows; row++) {

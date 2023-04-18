@@ -12,13 +12,14 @@ interface GridProps {
 }
 
 
-// Grid html skeleton
+// Grid skeleton
 const Grid = ({ numRows, numCols }: GridProps) => {
 
-const [api_board, setApiBoard] = useState([]); 
+// client-side omok board 
+const [client_omok_board, setClientBoard] = useState<number[]>([]); 
 
-// asyncronously fetch data - Works!!! 
-const loadBoard = async () => {
+// asyncronously fetch board - works
+const loadBoardFromBackend = async () => {
 
   // use utility and awesome fetch api to get data 
   const response = await fetch('http://localhost:8000/board');
@@ -27,10 +28,11 @@ const loadBoard = async () => {
   const response_data = await response.json();
 
   // fill state board using fetched data 
-  setApiBoard(response_data);
+  setClientBoard(response_data);
 }
 
-const placePiece = async (playerPiece: number, rowIndex: number, colIndex: number) => {
+// async place piece - works
+const placePieceIntoBackend = async (playerPiece: number, rowIndex: number, colIndex: number) => {
   try {
   const response = await fetch('http://localhost:8000/piece', {
     method: "POST",
@@ -41,25 +43,19 @@ const placePiece = async (playerPiece: number, rowIndex: number, colIndex: numbe
   });
 
     const result = await response.json();
-    console.log("Success: Response is ", result); 
-   //   setApiBoard(updatedBoard);
+   // console.log("Success: Response is ", result); 
+   // console.log("result.board is ", result.board);
+
+    // have to directly set result.board - do not create a var for it
+    setClientBoard(result.board);
+    console.log(client_omok_board);
+
   } catch (error) {
     console.log("Error is: ", error); 
   }
-  
   };
 
 
-
-/*
-
-// annoying way to console log
-useEffect(() => {
-  console.log("api board", api_board);
-  loadBoard();
-}, [api_board]);
-
-*/
 
   // create a board state to pass as parameter later into
   const [board, setBoard] = useState<string[][]>(
@@ -141,7 +137,7 @@ useEffect(() => {
           rowIndex={rowIndex}
           colIndex={colIndex}
           value={board[rowIndex][colIndex]}
-          onClick={() => handleClick(rowIndex, colIndex)}
+          onClick={() => handleClick(rowIndex, colIndex)} // handleClick() should include placePiece() in body
         />
       );
     }
@@ -164,8 +160,9 @@ useEffect(() => {
       {/* remove later...client cannot reset board - just there for testing purposes */}
       <button onClick={() => resetBoard()}>Clear board</button>
 
+      {/* Remove later... testing purposes */}
       <div>
-      <button onClick={() => placePiece(2, 0, 5)}>Post piece to board api</button>
+      <button onClick={() => placePieceIntoBackend(2, 0, 4)}>Post piece to board api</button>
       </div>
     </div>
   );
