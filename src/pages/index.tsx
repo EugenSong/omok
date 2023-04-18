@@ -18,7 +18,7 @@ export default function Home() {
       <main className={styles.main}>
         <h1>Start of Omok Game</h1>
         <div>
-      <Grid numRows={15} numCols={15} />
+      <Grid />
         </div>
       </main>
       

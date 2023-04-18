@@ -5,7 +5,7 @@ import styles from '@/styles/Home.module.css';
 interface CellProps {
     rowIndex: number;
     colIndex: number;
-    value: string;
+    value: number;
     onClick: () => void;
   }
 

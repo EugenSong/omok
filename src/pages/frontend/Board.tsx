@@ -6,137 +6,129 @@ import Message from '../components/Label';
 import checkWin from './winningLogic';
 
 
-interface GridProps {
-  numRows: number;
-  numCols: number;
-}
-
-
 // Grid skeleton
-const Grid = ({ numRows, numCols }: GridProps) => {
+const Grid = () => {
 
-// client-side omok board 
-const [client_omok_board, setClientBoard] = useState<number[]>([]); 
+    const BOARD_LEN = 19 // 19x19
 
-// asyncronously fetch board - works
-const loadBoardFromBackend = async () => {
+    // client-side omok board 
+    const [client_omok_board, setClientBoard] = useState<number[][]>(Array(BOARD_LEN).fill(0).map(() => Array(BOARD_LEN).fill(0))); 
 
-  // use utility and awesome fetch api to get data 
-  const response = await fetch('http://localhost:8000/board');
+    // asyncronously fetch board - works ... use each time I grab the updated board 
+    const loadBoardFromBackend = async () => {
 
-  // conv to json - don't forget await since promise
-  const response_data = await response.json();
+      // use utility and awesome fetch api to get data 
+      const response = await fetch('http://localhost:8000/board');
 
-  // fill state board using fetched data 
-  setClientBoard(response_data);
-}
+      // conv to json - don't forget await since promise
+      const response_data = await response.json();
 
-// async place piece - works
-const placePieceIntoBackend = async (playerPiece: number, rowIndex: number, colIndex: number) => {
-  try {
-  const response = await fetch('http://localhost:8000/piece', {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({player: playerPiece, x: rowIndex, y: colIndex}),
-  });
+      // fill state board using fetched data 
+      setClientBoard(response_data);
+    };
 
-    const result = await response.json();
-   // console.log("Success: Response is ", result); 
-   // console.log("result.board is ", result.board);
+    // async place piece - works ... took out playerPiece:number param since it exists in backend
+    const placePieceIntoBackend = async (rowIndex: number, colIndex: number) => {
+      try {
+      const response = await fetch('http://localhost:8000/piece', {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({x: rowIndex, y: colIndex}),
+      });
 
-    // have to directly set result.board - do not create a var for it
-    setClientBoard(result.board);
-    console.log(client_omok_board);
+        const result = await response.json();
+      // console.log("Success: Response is ", result); 
+      // console.log("result.board is ", result.board);
 
-  } catch (error) {
-    console.log("Error is: ", error); 
-  }
-  };
+        // have to directly set result.board - do not create a var for it
+        setClientBoard(result.board);
+        console.log(client_omok_board);
+
+      } catch (error) {
+        console.log("Error is: ", error); 
+      }
+    };
+
+    // reset board in the backend 
+    const resetBoard = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/board/reset', {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        }
+      });
+
+      const result = await response.json();
+      setClientBoard(result.board);
+      console.log(client_omok_board);
 
 
+    } catch (error) {
+      console.log("[Error] during resetBoard() PUT request");
+    }
+    };
 
-  // create a board state to pass as parameter later into
-  const [board, setBoard] = useState<string[][]>(
-    Array(numRows)
-      .fill(null)
-      .map(() => Array(numCols).fill(''))
-  );
-
-  // create player turn state 
-  const [p1Turn, setP1Turn] = useState<boolean>(true);
-
-  let player = '';
-
-  // reset board
-  const resetBoard = () => {
-
-    setBoard(
-      Array(numRows)
-        .fill(null)
-        .map(() => Array(numCols).fill(''))
-    );
-  }
+   // create player turn state 
+   const [playerTurn, setPlayerTurn] = useState<number>(1);
 
   // handle each player's piece in Grid
-  const handleClick = (rowIndex: number, colIndex: number) => {
-    if (board[rowIndex][colIndex] === '') {
+  const handleClick = async (rowIndex: number, colIndex: number) => {
+    placePieceIntoBackend(rowIndex, colIndex);
 
-      // create temp copy board
-      const newBoard = [...board];
-      newBoard[rowIndex][colIndex] = p1Turn ? 'X' : 'O';
-
-      // set real board === temp board
-      setBoard(newBoard);
-      setP1Turn(!p1Turn);
-
-      if (p1Turn) {
-        player = 'X'
-      } else {
-        player = 'O'
-      }
-
-      // after each placement, check if a win
-      if (checkWin(newBoard, 'X')) {
-        alert('Player X wins!');
-        setBoard(
-          Array(numRows)
-            .fill(null)
-            .map(() => Array(numCols).fill(''))
+    // switch player turns in the frontend - use as label
+    if (playerTurn === 1) setPlayerTurn(2);
+    else if (playerTurn === 2) setPlayerTurn(1);
+    
+   
+      // after piece placed in the backend, check if a win after updating frontend board
+      if (checkWin(client_omok_board, 1)) {
+        alert('Player 1 wins!');
+        setClientBoard(  // resets frontend board
+          Array(BOARD_LEN)
+            .fill(0)
+            .map(() => Array(BOARD_LEN).fill(0))
         );
-        setP1Turn(true);
-      } else if (checkWin(newBoard, 'O')) {
-        alert('Player O wins!');
-        setBoard(
-          Array(numRows)
-            .fill(null)
-            .map(() => Array(numCols).fill(''))
+        resetBoard(); // resets backend board
+        setPlayerTurn(1);
+
+      } else if (checkWin(client_omok_board, 2)) {
+        alert('Player 2 wins!');
+        setClientBoard(
+          Array(BOARD_LEN)
+            .fill(0)
+            .map(() => Array(BOARD_LEN).fill(0))
         );
-        setP1Turn(true);
+        resetBoard();
+        setPlayerTurn(1);
+
       } else if (
-        newBoard.every((row) => row.every((cell) => cell !== ''))
+        client_omok_board.every((row) => row.every((cell) => cell !== 0))
       ) {
         alert('Tie game!');
-        setBoard(
-          Array(numRows)
-            .fill(null)
-            .map(() => Array(numCols).fill(''))
+        setClientBoard(
+          Array(BOARD_LEN)
+            .fill(0)
+            .map(() => Array(BOARD_LEN).fill(0))
         );
-        setP1Turn(true);
+        resetBoard();
+        setPlayerTurn(1);
       }
-    }
+     
   };
+  
 
   const renderRow = (rowIndex: number) => {
     const cells = [];
-    for (let colIndex = 0; colIndex < numCols; colIndex++) {
+    for (let colIndex = 0; colIndex < BOARD_LEN; colIndex++) {
       cells.push(
         <Cell
           key={`${rowIndex}-${colIndex}`}
           rowIndex={rowIndex}
           colIndex={colIndex}
-          value={board[rowIndex][colIndex]}
+          value={client_omok_board[rowIndex][colIndex]}
           onClick={() => handleClick(rowIndex, colIndex)} // handleClick() should include placePiece() in body
         />
       );
@@ -146,9 +138,9 @@ const placePieceIntoBackend = async (playerPiece: number, rowIndex: number, colI
 
   // fill each outer array with html row
   const rows = []; 
-  for (let rowIndex = 0; rowIndex < numRows; rowIndex++) {
+  for (let rowIndex = 0; rowIndex < BOARD_LEN; rowIndex++) {
     rows.push(renderRow(rowIndex));
-  }
+  };
 
   return (
     <div>
@@ -162,7 +154,11 @@ const placePieceIntoBackend = async (playerPiece: number, rowIndex: number, colI
 
       {/* Remove later... testing purposes */}
       <div>
-      <button onClick={() => placePieceIntoBackend(2, 0, 4)}>Post piece to board api</button>
+      <button onClick={() => placePieceIntoBackend(0, 4)}>Post piece to board api</button>
+      </div>
+
+      <div>
+      <button onClick={() => loadBoardFromBackend()}>Load backend board</button>
       </div>
     </div>
   );
