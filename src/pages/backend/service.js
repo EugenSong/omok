@@ -21,6 +21,16 @@ const board = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 ]
 
+let playerTurn = 1;
+
+const getPlayerTurn = () => {
+    return playerTurn;
+}
+
+const updatePlayerTurn = (player) => {
+    playerTurn = player;
+}
+
 const updateBoard = (playerPiece, xPos, yPos) => {
 
     // place piece on "empty" spot
@@ -36,7 +46,7 @@ const updateBoard = (playerPiece, xPos, yPos) => {
 }
 
 const copyBoard = () => {
-    let printedBoard = [];
+    const printedBoard = [];
 
     // use for...of syntax b/c we want each value of iterable (array)
     for (const row of board) {
@@ -50,7 +60,19 @@ const copyBoard = () => {
     return printedBoard;
 }
 
+const resetBoard = () => {
+    for (let i = 0; i < board.length; i++) {
+        for (let j = 0; j < board[i].length; j++) {
+          board[i][j] = 0;
+        }
+      }
+
+}
+
 export {
     updateBoard,
     copyBoard,
+    resetBoard, 
+    getPlayerTurn,
+    updatePlayerTurn
 }

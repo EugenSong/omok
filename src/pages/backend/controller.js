@@ -1,7 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import { updateBoard, copyBoard } from './service.js';
+import { updateBoard, copyBoard, resetBoard, getPlayerTurn, updatePlayerTurn } from './service.js';
 
 dotenv.config();
 
@@ -23,18 +23,14 @@ app.options('/piece', (req, res) => {
 
 app.get('/board', (req, res) => {
     const board = copyBoard();
-    res.send(JSON.stringify(board));
+    res.setHeader('Content-Type', 'application/json'); // good practice to manually set header since res.send() doesn't
+    res.send(JSON.stringify(board)); // still gets sent as JSON w/o .setHeader() 
     return;
 })
 
 // function to validate request-body-params 
 function validate(req, res) {
-    if (req.body.player === null || typeof req.body.player !== 'number') {
-        res.sendStatus(400).json( {
-        Error: 'Invalid request - req.body.player' } );
-        return 0;
-    }
-    else if (req.body.x === null || typeof req.body.x !== 'number') {
+    if (req.body.x === null || typeof req.body.x !== 'number') {
         res.sendStatus(400).json( {
             Error: 'Invalid request - req.body.x' } );
             return 0;
@@ -56,21 +52,26 @@ app.post('/piece', (req, res) => {
 
     if (validate(req, res)) { // check for null req body
         
-        const player = req.body.player
         const xPos = req.body.x
         const yPos = req.body.y
+        const playerTurn = getPlayerTurn();
 
         // update board with player piece
-        if (updateBoard(player, xPos, yPos) === 1) {
+        if (updateBoard(playerTurn, xPos, yPos) === 1) {
             console.log("POST - updateBoard worked in controller");
+
+            // update player turn
+            if (playerTurn === 1) updatePlayerTurn(2);
+            else if (playerTurn === 2) updatePlayerTurn(1);
+            
            // console.log(board);
            res.status(200).json({ board: copyBoard() });
         } 
         // there's already a piece there 
-        else if (updateBoard(player, xPos, yPos) === 2) {
+        else if (updateBoard(playerTurn, xPos, yPos) === 2) {
             return; 
         } else {
-            console.log("Failure updating board!");
+            console.log("Failure updating board - Invalid move!");
             res.sendStatus(400).json(
                 "error in updateBoard() of POST"
             );
@@ -82,6 +83,13 @@ app.post('/piece', (req, res) => {
 
     }
 
+})
+
+app.put('/board/reset', (req, res) => {
+    resetBoard();
+    const board = copyBoard();
+    console.log("PUT - resetBoard worked in controller");
+    res.json( {board} ); // alternative way to send as JSON using res.json() instead of res.send()
 })
 
 app.listen(port, () => {
