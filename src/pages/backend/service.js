@@ -23,6 +23,16 @@ const board = [
 
 let playerTurn = 1;
 
+let gameEnded = false;
+
+const getGameEnded = () => {
+    return gameEnded;
+}
+
+const setGameEnded = (done) => {
+    gameEnded = done;
+}
+
 const getPlayerTurn = () => {
     return playerTurn;
 }
@@ -66,6 +76,8 @@ const resetBoard = () => {
           board[i][j] = 0;
         }
       }
+    updatePlayerTurn(1);
+    setGameEnded(false);
 
 }
 
@@ -74,5 +86,7 @@ export {
     copyBoard,
     resetBoard, 
     getPlayerTurn,
-    updatePlayerTurn
+    updatePlayerTurn,
+    getGameEnded,
+    setGameEnded
 }

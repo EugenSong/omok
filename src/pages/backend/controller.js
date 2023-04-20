@@ -1,7 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import { updateBoard, copyBoard, resetBoard, getPlayerTurn, updatePlayerTurn } from './service.js';
+import { updateBoard, copyBoard, resetBoard, getPlayerTurn, updatePlayerTurn, setGameEnded, getGameEnded } from './service.js';
 
 dotenv.config();
 
@@ -63,9 +63,10 @@ app.post('/piece', (req, res) => {
             // update player turn
             if (playerTurn === 1) updatePlayerTurn(2);
             else if (playerTurn === 2) updatePlayerTurn(1);
-            
+
            // console.log(board);
-           res.status(200).json({ board: copyBoard() });
+           const board = copyBoard()
+           res.status(200).json({ board });
         } 
         // there's already a piece there 
         else if (updateBoard(playerTurn, xPos, yPos) === 2) {

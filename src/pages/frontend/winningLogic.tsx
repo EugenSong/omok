@@ -2,6 +2,9 @@
 
 // check player win after each placed piece
 const checkWin = (board: number[][], player: number): boolean => {
+
+  // console.log("board in checkWin() is the following: ", board);
+  
     const numRows = board.length;
     const numCols = board[0].length;
     for (let row = 0; row < numRows; row++) {
