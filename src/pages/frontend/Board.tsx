@@ -135,6 +135,14 @@ const Grid = () => {
     rows.push(renderRow(rowIndex));
   }
 
+  /*
+  // wrap loadBoard() in another function & call every 3 seconds
+  function loadData() {
+    loadBoardFromBackend();
+  }
+  setInterval(loadData, 4000);
+  */
+
   return (
     <div>
       <Message message={text} />

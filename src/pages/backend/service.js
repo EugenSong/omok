@@ -80,68 +80,167 @@ const resetBoard = () => {
     setGameEnded(false);
 }
 
-// check player win after each placed piece
 const checkWin = (board, player) => {
-    // console.log("board in checkWin() is the following: ", board);
-
     const numRows = board.length;
     const numCols = board[0].length;
+
+    // Make six or more pieces in a row invalid && check (horizontal) win
     for (let row = 0; row < numRows; row++) {
+        let count = 0;
         for (let col = 0; col < numCols; col++) {
-            if (col <= numCols - 5) {
-                // Check horizontal line
-                if (
-                    board[row][col] === player &&
-                    board[row][col + 1] === player &&
-                    board[row][col + 2] === player &&
-                    board[row][col + 3] === player &&
-                    board[row][col + 4] === player
-                ) {
-                    return true;
+            if (board[row][col] === player) {
+                count++;
+                if (col + 1 < numCols) {
+                    if (count === 5 && board[row][col + 1] === player) {
+                        count = 0;
+                        continue;
+                    }
+                    else if (count === 5 && board[row][col + 1] !== player) {
+                        return true;
+                    }
                 }
             }
-            if (row <= numRows - 5) {
-                // Check vertical line
-                if (
-                    board[row][col] === player &&
-                    board[row + 1][col] === player &&
-                    board[row + 2][col] === player &&
-                    board[row + 3][col] === player &&
-                    board[row + 4][col] === player
-                ) {
-                    return true;
-                }
-                if (col <= numCols - 5) {
-                    // Check diagonal line (top-left to bottom-right)
-                    if (
-                        board[row][col] === player &&
-                        board[row + 1][col + 1] === player &&
-                        board[row + 2][col + 2] === player &&
-                        board[row + 3][col + 3] === player &&
-                        board[row + 4][col + 4] === player
-                    ) {
-                        return true;
-                    }
-                }
-                if (col >= 4) {
-                    // Check diagonal line (top-right to bottom-left)
-                    if (
-                        board[row][col] === player &&
-                        board[row + 1][col - 1] === player &&
-                        board[row + 2][col - 2] === player &&
-                        board[row + 3][col - 3] === player &&
-                        board[row + 4][col - 4] === player
-                    ) {
-                        return true;
-                    }
-                }
+            else {
+                count = 0;
             }
         }
     }
+
+    // Make six or more pieces in a row invalid && check (vertical) win
+    for (let col = 0; col < numCols; col++) {
+        let count = 0;
+        for (let row = 0; row < numRows; row++) {
+            if (board[row][col] === player) {
+                count++;
+                if (row + 1 < numRows) {
+                    if (count === 5 && board[row + 1][col] === player) {
+                        count = 0;
+                        continue;
+                    }
+                    else if (count === 5 && board[row + 1][col] !== player) {
+                        return true;
+                    }
+                }
+            }
+            else {
+                count = 0;
+            }
+        }
+    }
+
+    // Check for six or more pieces in a row (diagonal, top left -> bottom right) 
+    for (let row = 0; row < numRows; row++) {
+        let count = 0;
+        for (let col = 0; col < numCols; col++) {
+
+            const c = col;
+            const r = row;
+
+            while (board[row][col] === player) {
+                row++;
+                col++;
+                count++;
+
+                if (row < numRows && col < numCols) {
+
+                    if (count === 5 && board[row][col] === player) {
+                        count = 0;
+                        break;
+                    }
+                    else if (count === 5 && board[row][col] !== player) {
+                        return true;
+                    }
+                }
+            }
+
+           
+        }
+
+    }
+
+    // // Check for six or more pieces in a row (diagonal, bottom-left --> top-right) 
+    // for (let row = 0; row < numRows; row++) {
+    //     let count = 0;
+    //     for (let col = 0; col < numCols; col++) {
+    //         if (board[row][col] === player) {
+    //             count++;
+
+    //             if (row - 1 >= 0 && col + 1 < numCols) {
+    //                 if (count === 5 && board[row - 1][col + 1] === player) {
+    //                     count = 0;
+    //                     continue;
+    //                 }
+    //                 else if (count === 5 && board[row - 1][col + 1] !== player) {
+    //                     return true;
+    //                 }
+    //             }
+    //         }
+    //         else {
+    //             count = 0;
+    //         }
+    //     }
+    // }
+
+
+
+    // // Check for six or more pieces in a row (diagonal, top-right to bottom-left)
+    // for (let row = 0; row <= numRows - 6; row++) {
+    //     let count = 0;
+    //     for (let col = 5; col < numCols; col++) {
+    //         count = 0;
+    //         for (let i = 0; i < 6; i++) {
+    //             if (board[row + i][col - i] === player) {
+    //                 count++;
+    //                 if (count >= 6) {
+    //                     count = 0;
+    //                     return false;
+    //                 }
+    //             }
+
+    //         }
+    //     }
+    // }
+
+    // // Check for five in a row (diagonal, top-left to bottom-right)
+    // for (let row = 0; row <= numRows - 5; row++) {
+    //     for (let col = 0; col <= numCols - 5; col++) {
+    //         if (
+    //             board[row][col] === player &&
+    //             board[row + 1][col + 1] === player &&
+    //             board[row + 2][col + 2] === player &&
+    //             board[row + 3][col + 3] === player &&
+    //             board[row + 4][col + 4] === player
+    //         ) {
+    //             return true;
+    //         }
+    //     }
+    // }
+
+    // // Check for five in a row (diagonal, top-right to bottom-left)
+    // for (let row = 0; row <= numRows - 5; row++) {
+    //     for (let col = 4; col < numCols; col++) {
+    //         if (
+    //             board[row][col] === player &&
+    //             board[row + 1][col - 1] === player &&
+    //             board[row + 2][col - 2] === player &&
+    //             board[row + 3][col - 3] === player &&
+    //             board[row + 4][col - 4] === player
+    //         ) {
+    //             return true;
+    //         }
+    //     }
+    // }
+
+    // No five-in-a-row or six or more pieces in a row found
     return false;
+
+
 };
 
+
 const checkForWinner = (board, piece) => {
+
+    console.log(board);
 
     // win
     if (checkWin(board, piece)) {
