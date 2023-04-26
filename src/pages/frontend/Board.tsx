@@ -6,7 +6,7 @@ import Message from "../components/Label";
 
 // Grid skeleton
 const Grid = () => {
-  const BOARD_LEN = 19; // 19x19
+  const BOARD_LEN = 18; // 19x19
 
   // useState() aside: useState functions are async [do not block execution of code - doesn't wait for func to finish before moving onto next line of code]
   const [client_omok_board, setClientBoard] = useState<number[][]>(
@@ -78,7 +78,7 @@ const Grid = () => {
 
       await loadBoardFromBackend();
       await checkWinInBackend();
-   /* // BETTER, WORKING USING .THEN AND CALLBACK FUNCTION than above
+      /* // BETTER, WORKING USING .THEN AND CALLBACK FUNCTION than above
       response.json().then((result) => {
         setClientBoard(result.board);
         console.log("result.board is ", client_omok_board);
@@ -109,8 +109,8 @@ const Grid = () => {
     await placePieceIntoBackend(rowIndex, colIndex);
 
     // moved loadBoard() and checkWin() inside of placePiece() to return from original call when spot is already taken
-  //  await loadBoardFromBackend();
-  //  await checkWinInBackend();
+    //  await loadBoardFromBackend();
+    //  await checkWinInBackend();
   };
 
   const renderRow = (rowIndex: number) => {

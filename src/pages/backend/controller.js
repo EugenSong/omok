@@ -102,8 +102,8 @@ app.post('/piece', (req, res) => {
             return;
         } else {
             console.log("Failure updating board - Invalid move!");
-            res.sendStatus(400).json(
-                "error in updateBoard() of POST"
+            res.status(400).json(
+                {error: "error in updateBoard() of POST"}
             );
 
         }
