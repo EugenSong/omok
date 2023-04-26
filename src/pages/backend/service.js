@@ -1,28 +1,6 @@
-import { countReset } from "console";
 
-
-const board = [
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-]
-
+const BOARD_LEN = 19;
+const board = Array(BOARD_LEN).fill().map(() => Array(BOARD_LEN).fill(0));
 let playerTurn = 1;
 let gameEnded = false;
 
@@ -45,7 +23,7 @@ const updatePlayerTurn = (player) => {
 const updateBoard = (playerPiece, xPos, yPos) => {
 
     // place piece on "empty" spot
-    if (xPos >= 0 && xPos < board.length && yPos >= 0 && yPos < board[0].length && board[xPos][yPos] === 0) {
+    if (xPos >= 0 && xPos < BOARD_LEN && yPos >= 0 && yPos < BOARD_LEN && board[xPos][yPos] === 0) {
         board[xPos][yPos] = playerPiece;
         return 1;
     }
@@ -82,8 +60,12 @@ const resetBoard = () => {
 }
 
 const checkWin = (board, player) => {
+
     const numRows = board.length;
     const numCols = board[0].length;
+
+    console.log('numrows is ', numRows);
+    console.log('numcols is ', numCols);
 
     // // Make six or more pieces in a row invalid && check (horizontal) win
     for (let row = 0; row < numRows; row++) {
@@ -104,6 +86,8 @@ const checkWin = (board, player) => {
             counter = 0;
         }
     }
+
+    // PROBLEM PART OF CODE CAUSING INDEX 18 to be read weirdly in VERT CHECK
 
     // Make six or more pieces in a row invalid && check (vertical) win
     for (let col = 0; col < numCols; col++) {

@@ -6,7 +6,7 @@ import Message from "../components/Label";
 
 // Grid skeleton
 const Grid = () => {
-  const BOARD_LEN = 18; // 19x19
+  const BOARD_LEN = 19; // 19x19
 
   // useState() aside: useState functions are async [do not block execution of code - doesn't wait for func to finish before moving onto next line of code]
   const [client_omok_board, setClientBoard] = useState<number[][]>(
@@ -62,6 +62,8 @@ const Grid = () => {
   // async place piece - works ... took out playerPiece:number param since it exists in backend
   const placePieceIntoBackend = async (rowIndex: number, colIndex: number) => {
     try {
+      console.log('rowIndex in placePieceIntoBackend is: ', rowIndex);
+      console.log('rowIndex in placePieceIntoBackend is: ', colIndex);
       const response = await fetch("http://localhost:8000/piece", {
         method: "POST",
         headers: {
@@ -113,41 +115,25 @@ const Grid = () => {
     //  await checkWinInBackend();
   };
 
-  const renderRow = (rowIndex: number) => {
-    const cells = [];
-    for (let colIndex = 0; colIndex < BOARD_LEN; colIndex++) {
-      cells.push(
-        <Cell
-          key={`${rowIndex}-${colIndex}`}
-          rowIndex={rowIndex}
-          colIndex={colIndex}
-          value={client_omok_board[rowIndex][colIndex]}
-          onClick={() => handleClick(rowIndex, colIndex)} // handleClick() should include placePiece() in body
-        />
-      );
-    }
-    return <tr key={rowIndex}>{cells}</tr>;
-  };
-
-  // fill each outer array with html row
-  const rows = [];
-  for (let rowIndex = 0; rowIndex < BOARD_LEN; rowIndex++) {
-    rows.push(renderRow(rowIndex));
-  }
-
-  /*
-  // wrap loadBoard() in another function & call every 3 seconds
-  function loadData() {
-    loadBoardFromBackend();
-  }
-  setInterval(loadData, 4000);
-  */
-
   return (
     <div>
       <Message message={text} />
       <table className={styles.grid}>
-        <tbody>{rows}</tbody>
+        <tbody>
+          {client_omok_board.map((row, rowIndex) => (
+            <tr key={rowIndex}>
+              {row.map((cellValue, colIndex) => (
+                <Cell
+                  key={`${rowIndex}-${colIndex}`}
+                  rowIndex={rowIndex}
+                  colIndex={colIndex}
+                  value={cellValue}
+                  onClick={() => handleClick(rowIndex, colIndex)}
+                />
+              ))}
+            </tr>
+          ))}
+        </tbody>
       </table>
       <div>
         <button onClick={() => resetBoard()}>Clear board</button>
