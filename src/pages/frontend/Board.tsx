@@ -38,6 +38,11 @@ const Grid = () => {
   // async check win after each turn
   const checkWinInBackend = async () => {
     const response = await fetch("http://localhost:8000/board/checkwin");
+
+    console.log("response is ", response);
+
+    console.log("fetch happened in checkWin");
+
     const response_data = await response.json();
 
     console.log("The response data is the following: ", response_data);
@@ -62,8 +67,9 @@ const Grid = () => {
   // async place piece - works ... took out playerPiece:number param since it exists in backend
   const placePieceIntoBackend = async (rowIndex: number, colIndex: number) => {
     try {
-      console.log('rowIndex in placePieceIntoBackend is: ', rowIndex);
-      console.log('rowIndex in placePieceIntoBackend is: ', colIndex);
+      console.log("rowIndex in placePieceIntoBackend is: ", rowIndex);
+      console.log("colIndex in placePieceIntoBackend is: ", colIndex);
+
       const response = await fetch("http://localhost:8000/piece", {
         method: "POST",
         headers: {
@@ -72,14 +78,23 @@ const Grid = () => {
         body: JSON.stringify({ x: rowIndex, y: colIndex }),
       });
 
+      console.log("made it past fetch @ /piece");
+
       /* DON'T NEED TO USE RESPONSE - ignore */
       const response_data = await response.json();
 
       // space is already taken
       if (response_data.alreadyTaken === 1) return;
 
+      console.log("right before loadBoardFromBackend()");
+
       await loadBoardFromBackend();
+
+      console.log("made it past loadBoard()");
       await checkWinInBackend();
+
+      console.log("made it past checkWininbackend()");
+
       /* // BETTER, WORKING USING .THEN AND CALLBACK FUNCTION than above
       response.json().then((result) => {
         setClientBoard(result.board);

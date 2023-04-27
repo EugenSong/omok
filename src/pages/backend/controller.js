@@ -32,8 +32,14 @@ app.get('/board', (req, res) => {
 
 // route method to check win after each piece is placed onto board
 app.get('/board/checkwin', (req, res) => {
+   
     const board = gameService.copyBoard();
+
+    console.log('board from checkWin is: ', board);
+
     const turn = gameService.getPlayerTurn();
+
+    console.log('playerTurn in checkWin is: ', turn);
 
     let response = {};  // populate a response variable and send all at once
 
@@ -97,13 +103,13 @@ app.post('/piece', (req, res) => {
         }
         // there's already a piece there - always send a response back for a request to avoid leaving it hanging
         else if (gameService.updateBoard(playerTurn, xPos, yPos) === 2) {
-            res.send({message: "POST piece already exists. Do nothing.", alreadyTaken: 1});
+            res.send({ message: "POST piece already exists. Do nothing.", alreadyTaken: 1 });
             console.log('[POST] - piece already exists. Do nothing.");')
             return;
         } else {
             console.log("Failure updating board - Invalid move!");
             res.status(400).json(
-                {error: "error in updateBoard() of POST"}
+                { error: "error in updateBoard() of POST" }
             );
 
         }
