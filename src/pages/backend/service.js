@@ -212,26 +212,23 @@ const checkDownDiag = (board, player) => {
 
 // Check Upstairs Diag (bottom-left -> top right) & make 6+ pieces row invalid
 const checkUpDiag = (board, player) => {
+
+    console.log('checkUpDiag entered');
     const numRows = BOARD_LEN
     const numCols = BOARD_LEN
 
     for (let row = 0; row < numRows - 4; row++) {
         let count = 0;
-        // since down diags can only maximally start @ index 14 
-        for (let col = 0; col < numCols - 4; col++) {
+        // only want cols to go down to, not including index 3
+        for (let col = numCols - 1; col > 3; col--) {
 
             while (board[row][col] === player) {
                 row++;
-                col++;
+                col--;
                 count++;
 
                 // win w/ max start row index for down diag 
-                if (count === 5 && row === 19 && board[13][col] !== player) {
-                    return true;
-                }
-
-                // win w/ max start col index for down diag
-                if (count === 5 && col === 19 && board[row][13] !== player) {
+                if (count === 5 && row === 19 && board[13][col + 6] !== player) {
                     return true;
                 }
 
@@ -240,18 +237,20 @@ const checkUpDiag = (board, player) => {
 
                     // loop to move pointer up to the maximum dest index
                     while (1) {
-                        if (row >= 18 || col >= 18) break;
+                        if (row >= 18 || col <= 0) break;
                         else if (board[row][col] === player) {
                             row++;
-                            col++;
+                            col--;
                         } else {
                             break;
                         }
                     }
-                    if (row >= 18 || col >= 18) break;
+
+                    if (row >= 18 || col <= 0) break;
                     count = 0; // found diff piece -> reset
                 }
-                else if (count === 5 && board[row][col] !== player) {
+
+                else if (count === 5 && board[row - 6][col + 6] !== player) {
                     return true;
                 }
             }
@@ -266,10 +265,12 @@ const checkUpDiag = (board, player) => {
 const checkWin = (board, player) => {
 
     if (checkHorizontal(board, player)) return true;
-    console.log("made it past check horizonotal");
     if (checkVertical(board, player)) return true;
     if (checkDownDiag(board, player)) return true;
+
+    console.log("Before checkUpDiag");
     if (checkUpDiag(board, player)) return true;
+    console.log("After checkUpDiag");
 
     // No five-in-a-row win or there exists invalid # of pieces in a row for a win (6+)
     return false;
