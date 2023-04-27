@@ -162,6 +162,103 @@ const checkVertical = (board, player) => {
 const checkDownDiag = (board, player) => {
     const numRows = BOARD_LEN
     const numCols = BOARD_LEN
+
+    for (let row = 0; row < numRows - 4; row++) {
+        let count = 0;
+        // since down diags can only maximally start @ index 14 
+        for (let col = 0; col < numCols - 4; col++) {
+
+            while (board[row][col] === player) {
+                row++;
+                col++;
+                count++;
+
+                // win w/ max start row index for down diag 
+                if (count === 5 && row === 19 && board[13][col] !== player) {
+                    return true;
+                }
+
+                // win w/ max start col index for down diag
+                if (count === 5 && col === 19 && board[row][13] !== player) {
+                    return true;
+                }
+
+                // check if 6+ wins --> move pointer 
+                if (count === 5 && board[row][col] === player) {
+
+                    // loop to move pointer up to the maximum dest index
+                    while (1) {
+                        if (row >= 18 || col >= 18) break;
+                        else if (board[row][col] === player) {
+                            row++;
+                            col++;
+                        } else {
+                            break;
+                        }
+                    }
+                    if (row >= 18 || col >= 18) break;
+                    count = 0; // found diff piece -> reset
+                }
+                else if (count === 5 && board[row][col] !== player) {
+                    return true;
+                }
+            }
+            count = 0;
+        }
+    }
+    return false;
+}
+
+
+// Check Upstairs Diag (bottom-left -> top right) & make 6+ pieces row invalid
+const checkUpDiag = (board, player) => {
+    const numRows = BOARD_LEN
+    const numCols = BOARD_LEN
+
+    for (let row = 0; row < numRows - 4; row++) {
+        let count = 0;
+        // since down diags can only maximally start @ index 14 
+        for (let col = 0; col < numCols - 4; col++) {
+
+            while (board[row][col] === player) {
+                row++;
+                col++;
+                count++;
+
+                // win w/ max start row index for down diag 
+                if (count === 5 && row === 19 && board[13][col] !== player) {
+                    return true;
+                }
+
+                // win w/ max start col index for down diag
+                if (count === 5 && col === 19 && board[row][13] !== player) {
+                    return true;
+                }
+
+                // check if 6+ wins --> move pointer 
+                if (count === 5 && board[row][col] === player) {
+
+                    // loop to move pointer up to the maximum dest index
+                    while (1) {
+                        if (row >= 18 || col >= 18) break;
+                        else if (board[row][col] === player) {
+                            row++;
+                            col++;
+                        } else {
+                            break;
+                        }
+                    }
+                    if (row >= 18 || col >= 18) break;
+                    count = 0; // found diff piece -> reset
+                }
+                else if (count === 5 && board[row][col] !== player) {
+                    return true;
+                }
+            }
+            count = 0;
+        }
+    }
+    return false;
 }
 
 
@@ -171,114 +268,11 @@ const checkWin = (board, player) => {
     if (checkHorizontal(board, player)) return true;
     console.log("made it past check horizonotal");
     if (checkVertical(board, player)) return true;
+    if (checkDownDiag(board, player)) return true;
+    if (checkUpDiag(board, player)) return true;
 
-    // // Check for six or more pieces in a row (diagonal, top left -> bottom right) 
-    // for (let row = 0; row < numRows; row++) {
-    //     let count = 0;
-    //     for (let col = 0; col < numCols; col++) {
-
-    //         const c = col;
-    //         const r = row;
-
-    //         while (board[row][col] === player) {
-    //             row++;
-    //             col++;
-    //             count++;
-
-    //             if (row < numRows && col < numCols) {
-
-    //                 if (count === 5 && board[row][col] === player) {
-    //                     count = 0;
-    //                     break;
-    //                 }
-    //                 else if (count === 5 && board[row][col] !== player) {
-    //                     return true;
-    //                 }
-    //             }
-    //         }
-
-
-    //     }
-
-    // }
-
-    // // Check for six or more pieces in a row (diagonal, bottom-left --> top-right) 
-    // for (let row = 0; row < numRows; row++) {
-    //     let count = 0;
-    //     for (let col = 0; col < numCols; col++) {
-    //         if (board[row][col] === player) {
-    //             count++;
-
-    //             if (row - 1 >= 0 && col + 1 < numCols) {
-    //                 if (count === 5 && board[row - 1][col + 1] === player) {
-    //                     count = 0;
-    //                     continue;
-    //                 }
-    //                 else if (count === 5 && board[row - 1][col + 1] !== player) {
-    //                     return true;
-    //                 }
-    //             }
-    //         }
-    //         else {
-    //             count = 0;
-    //         }
-    //     }
-    // }
-
-
-
-    // // Check for six or more pieces in a row (diagonal, top-right to bottom-left)
-    // for (let row = 0; row <= numRows - 6; row++) {
-    //     let count = 0;
-    //     for (let col = 5; col < numCols; col++) {
-    //         count = 0;
-    //         for (let i = 0; i < 6; i++) {
-    //             if (board[row + i][col - i] === player) {
-    //                 count++;
-    //                 if (count >= 6) {
-    //                     count = 0;
-    //                     return false;
-    //                 }
-    //             }
-
-    //         }
-    //     }
-    // }
-
-    // // Check for five in a row (diagonal, top-left to bottom-right)
-    // for (let row = 0; row <= numRows - 5; row++) {
-    //     for (let col = 0; col <= numCols - 5; col++) {
-    //         if (
-    //             board[row][col] === player &&
-    //             board[row + 1][col + 1] === player &&
-    //             board[row + 2][col + 2] === player &&
-    //             board[row + 3][col + 3] === player &&
-    //             board[row + 4][col + 4] === player
-    //         ) {
-    //             return true;
-    //         }
-    //     }
-    // }
-
-    // // Check for five in a row (diagonal, top-right to bottom-left)
-    // for (let row = 0; row <= numRows - 5; row++) {
-    //     for (let col = 4; col < numCols; col++) {
-    //         if (
-    //             board[row][col] === player &&
-    //             board[row + 1][col - 1] === player &&
-    //             board[row + 2][col - 2] === player &&
-    //             board[row + 3][col - 3] === player &&
-    //             board[row + 4][col - 4] === player
-    //         ) {
-    //             return true;
-    //         }
-    //     }
-    // }
-
-    // No five-in-a-row or six or more pieces in a row found
+    // No five-in-a-row win or there exists invalid # of pieces in a row for a win (6+)
     return false;
-
-
 };
 
 
