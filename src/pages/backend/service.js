@@ -169,10 +169,90 @@ const checkDownDiag = (board, player) => {
     console.log(' **** checkDownDiag entered ***** ');
 
     // start row/col from index 1 so I can address the square before the first with -6 down there
-    for (let row = 1; row < numRows - 4; row++) {
+    for (let row = 0; row < numRows - 4; row++) {
         // since down diags can only maximally start @ index 14 
-        for (let col = 1; col < numCols - 4; col++) {
-            if (row === 14 || col === 14) {
+        for (let col = 0; col < numCols - 4; col++) {
+
+            // handle for row / col index 0 
+            if (row === 0) {
+
+                // handles row 0, cols 0-13
+                if (col < 14) {
+                    if (
+                        board[row][col] === player &&
+                        board[row + 1][col + 1] === player &&
+                        board[row + 2][col + 2] === player &&
+                        board[row + 3][col + 3] === player &&
+                        board[row + 4][col + 4] === player &&
+                        board[row + 5][col + 5] !== player) {
+                        return true;
+                    }
+                }
+
+                // handles row 0 , col 14
+                else if (col === 14) {
+                    if (
+                        board[row][col] === player &&
+                        board[row + 1][col + 1] === player &&
+                        board[row + 2][col + 2] === player &&
+                        board[row + 3][col + 3] === player &&
+                        board[row + 4][col + 4] === player) {
+                        return true;
+                    }
+                }
+
+                continue;
+
+            }
+
+            else if (col === 0) {
+
+                // handles rows 0-13 , col 0
+                if (row < 14) {
+                    if (
+                        board[row][col] === player &&
+                        board[row + 1][col + 1] === player &&
+                        board[row + 2][col + 2] === player &&
+                        board[row + 3][col + 3] === player &&
+                        board[row + 4][col + 4] === player &&
+                        board[row + 5][col + 5] !== player) {
+                        return true;
+                    }
+                }
+
+
+                // handles row 14, col 0 
+                else if (row === 14) {
+                    if (
+                        board[row][col] === player &&
+                        board[row + 1][col + 1] === player &&
+                        board[row + 2][col + 2] === player &&
+                        board[row + 3][col + 3] === player &&
+                        board[row + 4][col + 4] === player) {
+                        return true;
+                    }
+                }
+
+                continue;
+            }
+
+            // starts anywhere index but 0 [1-14]
+            else {
+                if (row === 14 || col === 14) {
+
+                    if ((
+                        board[row][col] === player) &&
+                        board[row + 1][col + 1] === player &&
+                        board[row + 2][col + 2] === player &&
+                        board[row + 3][col + 3] === player &&
+                        board[row + 4][col + 4] === player &&
+                        board[row - 1][col - 1] !== player) {
+                        return true;
+                    }
+                    continue;
+                }
+
+                // check for down diag that starts at left wall
 
                 if ((
                     board[row][col] === player) &&
@@ -180,22 +260,12 @@ const checkDownDiag = (board, player) => {
                     board[row + 2][col + 2] === player &&
                     board[row + 3][col + 3] === player &&
                     board[row + 4][col + 4] === player &&
+                    board[row + 5][col + 5] !== player &&
                     board[row - 1][col - 1] !== player) {
                     return true;
                 }
                 continue;
             }
-            if ((
-                board[row][col] === player) &&
-                board[row + 1][col + 1] === player &&
-                board[row + 2][col + 2] === player &&
-                board[row + 3][col + 3] === player &&
-                board[row + 4][col + 4] === player &&
-                board[row + 5][col + 5] !== player &&
-                board[row - 1][col - 1] !== player) {
-                return true;
-            }
-            continue;
         }
     }
     return false;
@@ -209,44 +279,99 @@ const checkUpDiag = (board, player) => {
     const numRows = BOARD_LEN
     const numCols = BOARD_LEN
 
+    // start row/col from index 1 so I can address the square before the first with -6 down there
     for (let row = 0; row < numRows - 4; row++) {
-        let count = 0;
-        // only want cols to go down to, not including index 3
+
+        // start cols from right side... 2nd column from wall up to col index 4
         for (let col = numCols - 1; col > 3; col--) {
 
-            while (board[row][col] === player) {
-                row++;
-                col--;
-                count++;
+            // handle row 0 
+            if (row === 0) {
 
-                // win w/ max start row index for down diag 
-                if (count === 5 && row === 19 && board[13][col + 6] !== player) {
-                    return true;
-                }
-
-                // check if 6+ wins --> move pointer 
-                if (count === 5 && board[row][col] === player) {
-
-                    // loop to move pointer up to the maximum dest index
-                    while (1) {
-                        if (row >= 18 || col <= 0) break;
-                        else if (board[row][col] === player) {
-                            row++;
-                            col--;
-                        } else {
-                            break;
-                        }
+                // handle row 0, cols 5-14
+                if (col > 4) {
+                    if ((
+                        board[row][col] === player) &&
+                        board[row + 1][col - 1] === player &&
+                        board[row + 2][col - 2] === player &&
+                        board[row + 3][col - 3] === player &&
+                        board[row + 4][col - 4] === player &&
+                        board[row + 5][col - 5] !== player) {
+                        return true;
                     }
-
-                    if (row >= 18 || col <= 0) break;
-                    count = 0; // found diff piece -> reset
                 }
 
-                else if (count === 5 && board[row - 6][col + 6] !== player) {
+                else if (col === 4) {
+                    if ((
+                        board[row][col] === player) &&
+                        board[row + 1][col - 1] === player &&
+                        board[row + 2][col - 2] === player &&
+                        board[row + 3][col - 3] === player &&
+                        board[row + 4][col - 4] === player) {
+                        return true;
+                    }
+                }
+
+                continue;
+            }
+
+            else if (col === numCols - 1) {
+                if (row < 14) {
+
+                    if ((
+                        board[row][col] === player) &&
+                        board[row + 1][col - 1] === player &&
+                        board[row + 2][col - 2] === player &&
+                        board[row + 3][col - 3] === player &&
+                        board[row + 4][col - 4] === player &&
+                        board[row + 5][col - 5] !== player) {
+                        return true;
+                    }
+                }
+
+                else if (row === 14) {
+                    if ((
+                        board[row][col] === player) &&
+                        board[row + 1][col - 1] === player &&
+                        board[row + 2][col - 2] === player &&
+                        board[row + 3][col - 3] === player &&
+                        board[row + 4][col - 4] === player) {
+                        return true;
+                    }
+                }
+
+                continue;
+            }
+
+            else {
+                if (row === 14 || col === 4) {
+
+                    if ((
+                        board[row][col] === player) &&
+                        board[row + 1][col - 1] === player &&
+                        board[row + 2][col - 2] === player &&
+                        board[row + 3][col - 3] === player &&
+                        board[row + 4][col - 4] === player &&
+                        board[row - 1][col + 1] !== player) {
+                        return true;
+                    }
+                    continue;
+
+                    // check for upDiag that ends right at the right wall
+                }
+                if ((
+                    board[row][col] === player) &&
+                    board[row + 1][col - 1] === player &&
+                    board[row + 2][col - 2] === player &&
+                    board[row + 3][col - 3] === player &&
+                    board[row + 4][col - 4] === player &&
+                    board[row + 5][col - 5] !== player &&
+                    board[row - 1][col + 1] !== player) {
                     return true;
                 }
+                continue;
+
             }
-            count = 0;
         }
     }
     return false;
