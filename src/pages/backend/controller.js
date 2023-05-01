@@ -35,7 +35,7 @@ app.get('/board/checkwin', (req, res) => {
    
     const board = gameService.copyBoard();
 
-    console.log('board from checkWin is: ', board);
+    console.log('current board from checkWin is: ', board);
 
     const turn = gameService.getPlayerTurn();
 
@@ -95,7 +95,7 @@ app.post('/piece', (req, res) => {
 
         // update board with player piece
         if (gameService.updateBoard(playerTurn, xPos, yPos) === 1) {
-            console.log("POST - updateBoard worked in controller");
+            //console.log("POST - updateBoard worked in controller");
 
             // console.log(board);
             const board = gameService.copyBoard()

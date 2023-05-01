@@ -33,19 +33,21 @@ const Grid = () => {
 
     // fill state board using fetched data
     setClientBoard(response_data);
+
+    return;
   };
 
   // async check win after each turn
   const checkWinInBackend = async () => {
     const response = await fetch("http://localhost:8000/board/checkwin");
 
-    console.log("response is ", response);
-
-    console.log("fetch happened in checkWin");
+    console.log("[checkWinInBackend] entered.");
 
     const response_data = await response.json();
-
-    console.log("The response data is the following: ", response_data);
+    console.log(
+      "[checkWinInBackend] - The response data is the following: ",
+      response_data
+    );
 
     // winner found
     if (response_data.isWon === 0) {
@@ -78,22 +80,14 @@ const Grid = () => {
         body: JSON.stringify({ x: rowIndex, y: colIndex }),
       });
 
-      console.log("made it past fetch @ /piece");
-
       /* DON'T NEED TO USE RESPONSE - ignore */
       const response_data = await response.json();
 
       // space is already taken
       if (response_data.alreadyTaken === 1) return;
 
-      console.log("right before loadBoardFromBackend()");
-
       await loadBoardFromBackend();
-
-      console.log("made it past loadBoard()");
       await checkWinInBackend();
-
-      console.log("made it past checkWininbackend()");
 
       /* // BETTER, WORKING USING .THEN AND CALLBACK FUNCTION than above
       response.json().then((result) => {
@@ -104,6 +98,8 @@ const Grid = () => {
     } catch (error) {
       console.log("Error is: ", error);
     }
+
+    return;
   };
 
   // resets omok board and player turn in backend and resets board in frontend
@@ -119,6 +115,8 @@ const Grid = () => {
     } catch (error) {
       console.log("[Error] during resetBoard() PUT request");
     }
+
+    return;
   };
 
   // handle each player's piece in Grid
@@ -128,6 +126,8 @@ const Grid = () => {
     // moved loadBoard() and checkWin() inside of placePiece() to return from original call when spot is already taken
     //  await loadBoardFromBackend();
     //  await checkWinInBackend();
+
+    return;
   };
 
   return (
