@@ -20,6 +20,7 @@ const updatePlayerTurn = (player) => {
     playerTurn = player;
 }
 
+// check in here for double 3's
 const updateBoard = (playerPiece, xPos, yPos) => {
 
     // place piece on "empty" spot
@@ -271,7 +272,6 @@ const checkDownDiag = (board, player) => {
     return false;
 }
 
-
 // Check Upstairs Diag (bottom-left -> top right) & make 6+ pieces row invalid
 const checkUpDiag = (board, player) => {
 
@@ -384,10 +384,7 @@ const checkWin = (board, player) => {
     if (checkHorizontal(board, player)) return true;
     if (checkVertical(board, player)) return true;
     if (checkDownDiag(board, player)) return true;
-
-
     if (checkUpDiag(board, player)) return true;
-
 
     // No five-in-a-row win or there exists invalid # of pieces in a row for a win (6+)
     return false;

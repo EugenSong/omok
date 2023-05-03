@@ -32,14 +32,14 @@ app.get('/board', (req, res) => {
 
 // route method to check win after each piece is placed onto board
 app.get('/board/checkwin', (req, res) => {
-   
+
     const board = gameService.copyBoard();
 
-    console.log('current board from checkWin is: ', board);
+    //console.log('current board from checkWin is: ', board);
 
     const turn = gameService.getPlayerTurn();
 
-    console.log('playerTurn in checkWin is: ', turn);
+    //console.log('playerTurn in checkWin is: ', turn);
 
     let response = {};  // populate a response variable and send all at once
 

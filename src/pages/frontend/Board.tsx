@@ -3,13 +3,20 @@ import styles from "@/styles/Home.module.css";
 import { useState, useEffect } from "react";
 import Cell from "../components/Cell";
 import Message from "../components/Label";
+import mushroom from "../mushroom.png";
+import slime from "../slime.png";
+import Image from "next/image";
 
 // Grid skeleton
 const Grid = () => {
   const BOARD_LEN = 19; // 19x19
 
+  // define the URLs for each player's piece
+  const player1Piece = mushroom;
+  const player2Piece = slime;
+
   // useState() aside: useState functions are async [do not block execution of code - doesn't wait for func to finish before moving onto next line of code]
-  const [client_omok_board, setClientBoard] = useState<number[][]>(
+  const [client_omok_board, setClientBoard] = useState<string[][]>(
     Array(BOARD_LEN)
       .fill(0)
       .map(() => Array(BOARD_LEN).fill(0))
@@ -31,8 +38,26 @@ const Grid = () => {
     // conv to json - don't forget await since promise
     const response_data = await response.json();
 
+
+    // *************************** WORKING HERE ************************************
+
+    // map over the response data and replace the numbers with the corresponding asset URLs
+    const client_board_with_assets = response_data.map((row: any[]) =>
+      row.map((cellValue) => {
+        if (cellValue === 1) {
+          return mushroom;
+        } else if (cellValue === 2) {
+          return slime;
+        } else {
+          return " "; // empty cell
+        }
+      })
+    );
     // fill state board using fetched data
-    setClientBoard(response_data);
+    setClientBoard(client_board_with_assets);
+
+
+
 
     return;
   };
@@ -133,6 +158,8 @@ const Grid = () => {
   return (
     <div>
       <Message message={text} />
+      <Image src={mushroom} alt="Mushroom Image" />
+      <Image src={slime} alt="Slime Image" />
       <table className={styles.grid}>
         <tbody>
           {client_omok_board.map((row, rowIndex) => (

@@ -11,15 +11,27 @@
 .grid td {
   width: 30px;
   height: 30px;
-  border: .5px solid black;
-  background-color: #404040;
-  
+  background-color: transparent;
+  border-radius: 0;
+  border-spacing: 0;
+  text-align: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center center;
+  /* background-image: url(../pages/ms-copy.jpg); */
+
+}
+
+.grid td:hover {
+  background-color: lightpink;
 }
 
 .grid {
-  background-color: #1E2124;
+  background-color: transparent;
   margin: 0 auto;
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: transparent;
+  border-collapse: collapse;
 }
