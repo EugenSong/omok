@@ -3,8 +3,8 @@ import styles from "@/styles/Home.module.css";
 import { useState, useEffect } from "react";
 import Cell from "../components/Cell";
 import Message from "../components/Label";
-import mushroom from "../mushroom.png";
-import slime from "../slime.png";
+import mushroom from "../../../public/mushroom.png";
+import slime from "../../../public/slime.png";
 import Image from "next/image";
 
 // Grid skeleton
@@ -18,17 +18,17 @@ const Grid = () => {
   // useState() aside: useState functions are async [do not block execution of code - doesn't wait for func to finish before moving onto next line of code]
   const [client_omok_board, setClientBoard] = useState<string[][]>(
     Array(BOARD_LEN)
-      .fill(0)
-      .map(() => Array(BOARD_LEN).fill(0))
+      .fill("")
+      .map(() => Array(BOARD_LEN).fill(""))
   );
 
   // label state
-  const [text, setText] = useState("Initial label");
+  const [text, setText] = useState("Player 1's Turn!");
 
   // create player turn state --> later on need to figure out a way to not start w/ player 1
   const [playerTurn, setPlayerTurn] = useState<number>(1);
 
-  let gameEnded = false;
+  const [gameEnded, setGameEnded] = useState<boolean>(false);
 
   // asyncronously fetch board and update client-side board - works ...
   const loadBoardFromBackend = async () => {
@@ -38,26 +38,28 @@ const Grid = () => {
     // conv to json - don't forget await since promise
     const response_data = await response.json();
 
-
     // *************************** WORKING HERE ************************************
 
     // map over the response data and replace the numbers with the corresponding asset URLs
     const client_board_with_assets = response_data.map((row: any[]) =>
       row.map((cellValue) => {
         if (cellValue === 1) {
-          return mushroom;
+          return player1Piece;
         } else if (cellValue === 2) {
-          return slime;
+          return player2Piece;
         } else {
           return " "; // empty cell
         }
       })
     );
-    // fill state board using fetched data
-    setClientBoard(client_board_with_assets);
 
+    // Convert the 2-d array of objects board to an array of strings (URLS to set state)
+    const client_board_with_strings = client_board_with_assets.map((row: any) =>
+      row.map((asset: any) => asset.src)
+    );
 
-
+    // fill state board using fetched, converted data
+    setClientBoard(client_board_with_strings);
 
     return;
   };
@@ -79,14 +81,25 @@ const Grid = () => {
       console.log("Player ", response_data.winner, "has won.");
       console.log(response_data.message);
       //gameEnded = true;
-      resetBoard();
+      const winner = response_data.winner;
+      setText(`Player ${winner} has won!`);
+      setGameEnded(true);
+      // resetBoard();
     }
 
     // tie game
     else if (response_data.isWon === 2) {
       console.log("Tie game. No winner.");
       console.log(response_data.message);
+
+      setText("Tie Game!! No winner!");
       resetBoard();
+    }
+
+    // no winner --> change player turn label
+    else if (response_data.isWon === 1) {
+      const nextTurn = response_data.nextplayer;
+      setText(`Player ${nextTurn}'s turn!`);
     }
     return;
   };
@@ -137,6 +150,8 @@ const Grid = () => {
         },
       });
       await loadBoardFromBackend();
+      setText("Player 1's Turn!");
+      setGameEnded(false);
     } catch (error) {
       console.log("[Error] during resetBoard() PUT request");
     }
@@ -146,7 +161,7 @@ const Grid = () => {
 
   // handle each player's piece in Grid
   const handleClick = async (rowIndex: number, colIndex: number) => {
-    await placePieceIntoBackend(rowIndex, colIndex);
+    if (gameEnded === false) await placePieceIntoBackend(rowIndex, colIndex);
 
     // moved loadBoard() and checkWin() inside of placePiece() to return from original call when spot is already taken
     //  await loadBoardFromBackend();
@@ -157,28 +172,46 @@ const Grid = () => {
 
   return (
     <div>
-      <Message message={text} />
-      <Image src={mushroom} alt="Mushroom Image" />
-      <Image src={slime} alt="Slime Image" />
-      <table className={styles.grid}>
-        <tbody>
-          {client_omok_board.map((row, rowIndex) => (
-            <tr key={rowIndex}>
-              {row.map((cellValue, colIndex) => (
-                <Cell
-                  key={`${rowIndex}-${colIndex}`}
-                  rowIndex={rowIndex}
-                  colIndex={colIndex}
-                  value={cellValue}
-                  onClick={() => handleClick(rowIndex, colIndex)}
-                />
+      <div className={styles.container}>
+        <div className={styles.player1label}>
+          <div className={styles.leftlabel}>Player 1</div>
+          <div>
+            <Image src={mushroom} alt="Mushroom Image" />
+          </div>
+        </div>
+
+        <div className={styles.labelandtable}>
+          <div className={styles.messagelabel}>
+            <Message message={text} />
+          </div>
+          <div>
+            <button onClick={() => resetBoard()}>Restart Game</button>
+          </div>
+          <table className={styles.grid}>
+            <tbody>
+              {client_omok_board.map((row, rowIndex) => (
+                <tr key={rowIndex}>
+                  {row.map((cellValue, colIndex) => (
+                    <Cell
+                      key={`${rowIndex}-${colIndex}`}
+                      rowIndex={rowIndex}
+                      colIndex={colIndex}
+                      value={cellValue}
+                      onClick={() => handleClick(rowIndex, colIndex)}
+                    />
+                  ))}
+                </tr>
               ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <div>
-        <button onClick={() => resetBoard()}>Clear board</button>
+            </tbody>
+          </table>
+        </div>
+
+        <div className={styles.player2label}>
+          <div className={styles.rightlabel}>Player 2</div>
+          <div>
+            <Image src={slime} alt="Slime Image" />
+          </div>
+        </div>
       </div>
     </div>
   );

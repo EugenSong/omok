@@ -9,8 +9,8 @@
 }
 
 .grid td {
-  width: 30px;
-  height: 30px;
+  width: 35px;
+  height: 35px;
   background-color: transparent;
   border-radius: 0;
   border-spacing: 0;
@@ -18,15 +18,16 @@
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center center;
-  /* background-image: url(../pages/ms-copy.jpg); */
+  background-image: url(../../public/board.jpg);
 
 }
 
-.grid td:hover {
-  background-color: lightpink;
-}
+/* .grid td:hover {
+  background-color: black;
+} */
 
 .grid {
+  table-layout: fixed;
   background-color: transparent;
   margin: 0 auto;
   display: flex;
@@ -34,4 +35,42 @@
   align-items: center;
   background-color: transparent;
   border-collapse: collapse;
+  border: 7px solid white;
+  
+}
+
+.img {
+  width: 35px; /* set the width of the image */
+  height: 30px; /* set the height of the image */
+}
+
+.messagelabel {
+  display: flex;
+  font-size: 50px;
+  font-weight: bolder;
+  justify-content: center;
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.player1label {
+  display: flex;
+  flex-direction: column;
+  margin-right: 50px; 
+  
+}
+
+.player2label {
+  display: flex;
+  flex-direction: column;
+  margin-left: 50px;
+}
+
+.labelandtable {
+  justify-content: center;
 }

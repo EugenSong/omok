@@ -16,7 +16,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <h1>Start of Omok Game</h1>
+        <h1>Omok - Connect 5</h1>
         <div>
       <Grid />
         </div>

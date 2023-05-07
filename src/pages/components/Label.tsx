@@ -12,7 +12,7 @@ interface MessageProps {
 const Message = ( { message }: MessageProps) => {
   
     return (
-      <p>{message}</p>
+      <p className={styles.label}>{message}</p>
     );
   }
 

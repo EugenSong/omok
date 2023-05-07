@@ -2,15 +2,6 @@
 const BOARD_LEN = 19;
 const board = Array(BOARD_LEN).fill(0).map(() => Array(BOARD_LEN).fill(0));
 let playerTurn = 1;
-let gameEnded = false;
-
-const getGameEnded = () => {
-    return gameEnded;
-}
-
-const setGameEnded = (done) => {
-    gameEnded = done;
-}
 
 const getPlayerTurn = () => {
     return playerTurn;
@@ -57,7 +48,7 @@ const resetBoard = () => {
         }
     }
     updatePlayerTurn(1);
-    setGameEnded(false);
+
 
     return;
 }
@@ -395,12 +386,10 @@ const checkForWinner = (board, piece) => {
 
     // win
     if (checkWin(board, piece)) {
-        setGameEnded(true);
         return 1;
     }
     // tie
     else if (board.every((row) => row.every((cell) => cell !== 0))) {
-        setGameEnded(true);
         return 2;
     }
 
@@ -414,8 +403,6 @@ export {
     resetBoard,
     getPlayerTurn,
     updatePlayerTurn,
-    getGameEnded,
-    setGameEnded,
     checkForWinner
 }
 
@@ -425,8 +412,6 @@ const gameService = {
     resetBoard,
     getPlayerTurn,
     updatePlayerTurn,
-    getGameEnded,
-    setGameEnded,
     checkForWinner,
 };
 
