@@ -13,28 +13,29 @@ const updatePlayerTurn = (player) => {
   playerTurn = player;
 };
 
-// check in here for double 3's
+const isValidEmptyCoordinate = (xPos, yPos) => {
+  // shorthand for... if (condition) return true ; return false;
+  return (
+    xPos >= 0 &&
+    xPos < BOARD_LEN &&
+    yPos >= 0 &&
+    yPos < BOARD_LEN && // check in here for double 3's
+    board[xPos][yPos] === 0
+  );
+};
+
 const updateBoard = (playerPiece, xPos, yPos) => {
   // check first for double three placement before placing into board
   // if (doubleThree)
 
   // place piece on "empty" spot
-  if (
-    xPos >= 0 &&
-    xPos < BOARD_LEN &&
-    yPos >= 0 &&
-    yPos < BOARD_LEN &&
-    board[xPos][yPos] === 0
-  ) {
+  if (isValidEmptyCoordinate(xPos, yPos)) {
     board[xPos][yPos] = playerPiece;
     return 1;
   }
-  // spot is already taken by a player
+  // spot is already taken by either player
   else if (
-    xPos >= 0 &&
-    xPos < board.length &&
-    yPos >= 0 &&
-    yPos < board[0].length &&
+    isValidEmptyCoordinate(xPos, yPos) &&
     (board[xPos][yPos] === 1 || board[xPos][yPos] === 2)
   )
     return 2;
@@ -394,10 +395,6 @@ const checkForWinner = (board, piece) => {
   return 0;
 };
 
-const checkForDoubleThree = (board, piece) => {
-  return;
-};
-
 const directions = [
   [0, 1],
   [1, 0],
@@ -406,24 +403,45 @@ const directions = [
 ]; // [ right, down, up-right diag, down-left diag]
 
 // function to check that each space is valid and empty
-const isValidAndEmpty = (x, y, playerPiece) => {
-  if (x < 0 || x >= BOARD_SIZE || y < 0 || y >= BOARD_SIZE) {
+const isCurrentPieceOrEmpty = (x, y, playerPiece) => {
+  if (x < 0 || x >= BOARD_LEN || y < 0 || y >= BOARD_LEN) {
     return false;
   }
-  return board[x][y] === playerPiece || board[x][y] === 0;
+  return board[x][y] === playerPiece || board[x][y] === 0; // want to count empty spaces AND my piece
 };
 
+const isEmpty = (x, y) => {
+  if (x < 0 || x >= BOARD_LEN || y < 0 || y >= BOARD_LEN) {
+    return false;
+  }
+  return board[x][y] === 0; // want to count empty spaces AND my piece
+};
 // function to check how many pieces in a row from a given position
 const countPieces = (x, y, dx, dy, playerPiece) => {
   let count = 0;
-  while (isValidAndEmpty(x, y, playerPiece)) {
+  let hasEmptySpace = false;
+  let encounteredEmpty = false;
+
+  while (isCurrentPieceOrEmpty(x, y, playerPiece)) {
     if (board[x][y] === playerPiece) {
       count++;
+
+      // if space is empty and we haven't encountered empty space before
+    } else if (!hasEmptySpace) {
+      hasEmptySpace = true;
+      encounteredEmpty = true;
+      count++;
+
+      // if space is enemy player piece or empty space already encountered
+      // edit 2: 'if space is enemy player' check is invalid since isCurrentPieceOrEmpty() already checks for that
+      // -> just breaks when empty space is already encountered
+    } else {
+      break;
     }
     x += dx;
     y += dy;
   }
-  return count;
+  return { count: count, encounteredEmpty: encounteredEmpty };
 };
 
 // function to check if a move creates a 'double three' situation
@@ -431,12 +449,29 @@ const isDoubleThree = (x, y, playerPiece) => {
   let threesCount = 0;
   for (let [dx, dy] of directions) {
     // important part! -> check both sides of spot (curr direction and opposite direction)
-    let count1 = countPieces(x - dx, y - dy, -dx, -dy, playerPiece);
-    let count2 = countPieces(x + dx, y + dy, dx, dy, playerPiece);
+    let countData1 = countPieces(x - dx, y - dy, -dx, -dy, playerPiece);
+    let countData2 = countPieces(x + dx, y + dy, dx, dy, playerPiece);
 
+    let totalCount = countData1.count + countData2.count;
+    let encounteredEmpty =
+      countData1.encounteredEmpty || countData2.encounteredEmpty;
     // if total count is 3 -> then there is at least a line of three
-    if (count1 + count2 === 3) {
-      threesCount++;
+    if (
+      (totalCount === 3 && !encounteredEmpty) ||
+      (totalCount === 4 && encounteredEmpty)
+    ) {
+      // ensure both ends of line are unblocked
+      if (
+        isEmpty(
+          x - (countData1.count + 1) * dx,
+          y - (countData1.count + 1) * dy
+        ) &&
+        isEmpty(
+          x + (countData2.count + 1) * dx,
+          y + (countData2.count + 1) * dy
+        )
+      )
+        threesCount++;
     }
   }
   return threesCount >= 2;
