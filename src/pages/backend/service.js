@@ -31,6 +31,9 @@ const isValidEmptyCoordinate = (xPos, yPos) => {
 
 // updateBoard() contains checks for double three inside AND for double three edge case... abstract those parts for simpler, clean code
 const updateBoard = (playerPiece, xPos, yPos) => {
+  // spot is already taken by either player - check this corner case first!
+  if (board[xPos][yPos] === 1 || board[xPos][yPos] === 2) return 2;
+
   // place piece on "empty" spot
   if (isValidEmptyCoordinate(xPos, yPos)) {
     // check first to see if spot has to be blocked by curr player
@@ -38,6 +41,7 @@ const updateBoard = (playerPiece, xPos, yPos) => {
 
     // set to opposing turn and check if it's a win
     board[xPos][yPos] = opponent;
+    //  NOTE: above line unnecessary since isDoubleThree() [countPieces] utilizes offsets from placed piece
     if (hasAFourInARow(xPos, yPos, opponent)) {
       board[xPos][yPos] = playerPiece; // let curr player block even if double 3
       return 1;
@@ -54,12 +58,6 @@ const updateBoard = (playerPiece, xPos, yPos) => {
 
     return 1;
   }
-  // spot is already taken by either player
-  else if (
-    isValidEmptyCoordinate(xPos, yPos) &&
-    (board[xPos][yPos] === 1 || board[xPos][yPos] === 2)
-  )
-    return 2;
 
   return 0;
 };
