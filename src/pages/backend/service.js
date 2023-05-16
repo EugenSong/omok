@@ -25,12 +25,16 @@ const isValidEmptyCoordinate = (xPos, yPos) => {
 };
 
 const updateBoard = (playerPiece, xPos, yPos) => {
-  // check first for double three placement before placing into board
-  // if (doubleThree)
-
   // place piece on "empty" spot
   if (isValidEmptyCoordinate(xPos, yPos)) {
     board[xPos][yPos] = playerPiece;
+
+    // check for double three placement after placing into board -> return 3
+    if (isDoubleThree(xPos, yPos, playerPiece)) {
+      board[xPos][yPos] = 0;
+      return 3;
+    }
+
     return 1;
   }
   // spot is already taken by either player
@@ -416,7 +420,7 @@ const isEmpty = (x, y) => {
   }
   return board[x][y] === 0; // want to count empty spaces AND my piece
 };
-// function to check how many pieces in a row from a given position
+// function to check how many pieces in a row given a certain direction
 const countPieces = (x, y, dx, dy, playerPiece) => {
   let count = 0;
   let hasEmptySpace = false;
