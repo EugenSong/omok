@@ -466,6 +466,40 @@ const countPieces = (x, y, dx, dy, playerPiece) => {
   return { count: count, encounteredEmpty: encounteredEmpty };
 };
 
+// function to check if a move creates a 'double three' situation
+const isDoubleThree = (x, y, playerPiece) => {
+  let threesCount = 0;
+  for (let [dx, dy] of directions) {
+    // important part! -> check both sides of spot (curr direction and opposite direction)
+    let countData1 = countPieces(x - dx, y - dy, -dx, -dy, playerPiece);
+    let countData2 = countPieces(x + dx, y + dy, dx, dy, playerPiece);
+
+    let totalCount = countData1.count + countData2.count;
+    let encounteredEmpty =
+      countData1.encounteredEmpty || countData2.encounteredEmpty;
+
+    // the double 3 algorithm isn't what was intended but it works out.
+    // if(condition) originally had if (totalCount === 3 && !encounteredEmpty)
+    // but the current implementation actually countPieces using an offset
+    // and includes both empty ends in total sum... which turns out to be 4 and encounteredEmpty is always T
+    if (totalCount === 4 && encounteredEmpty) {
+      // ensure both ends of line are unblocked
+      if (
+        isEmpty(
+          x - (countData1.count + 1) * dx,
+          y - (countData1.count + 1) * dy
+        ) &&
+        isEmpty(
+          x + (countData2.count + 1) * dx,
+          y + (countData2.count + 1) * dy
+        )
+      )
+        threesCount++;
+    }
+  }
+  return threesCount >= 2;
+};
+
 // function to check for an existing urgent threat (4 needs to be blocked) in double-3 situation
 const isCurrentPiece = (x, y, playerPiece) => {
   if (x < 0 || x >= BOARD_LEN || y < 0 || y >= BOARD_LEN) {
@@ -509,42 +543,9 @@ const hasAFourInARow = (x, y, playerPiece) => {
     let totalCount = count1 + count2;
 
     // if total count is 5 -> then there is a win that needs to be blocked
-    if (totalCount === 5) return true;
+    if (totalCount === 4) return true;
   }
   return false;
-};
-
-// function to check if a move creates a 'double three' situation
-const isDoubleThree = (x, y, playerPiece) => {
-  let threesCount = 0;
-  for (let [dx, dy] of directions) {
-    // important part! -> check both sides of spot (curr direction and opposite direction)
-    let countData1 = countPieces(x - dx, y - dy, -dx, -dy, playerPiece);
-    let countData2 = countPieces(x + dx, y + dy, dx, dy, playerPiece);
-
-    let totalCount = countData1.count + countData2.count;
-    let encounteredEmpty =
-      countData1.encounteredEmpty || countData2.encounteredEmpty;
-    // if total count is 3 -> then there is at least a line of three
-    if (
-      (totalCount === 3 && !encounteredEmpty) ||
-      (totalCount === 4 && encounteredEmpty)
-    ) {
-      // ensure both ends of line are unblocked
-      if (
-        isEmpty(
-          x - (countData1.count + 1) * dx,
-          y - (countData1.count + 1) * dy
-        ) &&
-        isEmpty(
-          x + (countData2.count + 1) * dx,
-          y + (countData2.count + 1) * dy
-        )
-      )
-        threesCount++;
-    }
-  }
-  return threesCount >= 2;
 };
 
 export {
