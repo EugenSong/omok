@@ -519,7 +519,7 @@ const countPiecesAroundDoubleThree = (x, y, dx, dy, playerPiece) => {
   return count;
 };
 
-// function to check if a move creates a 'double three' situation - call function with opposing piece
+// function to check if move creates a row-in-a-row in any direction given x,y
 const hasAFourInARow = (x, y, playerPiece) => {
   for (let [dx, dy] of directions) {
     // important part! -> check both sides of spot (curr direction and opposite direction)

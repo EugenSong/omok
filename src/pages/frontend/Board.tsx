@@ -25,7 +25,7 @@ const Grid = () => {
   // label state
   const [text, setText] = useState("Player 1's Turn!");
 
-  // create player turn state --> later on need to figure out a way to not start w/ player 1
+  // player turn state to have label sync up with passing turn in the backend
   const [playerTurn, setPlayerTurn] = useState<number>(1);
 
   const [gameEnded, setGameEnded] = useState<boolean>(false);
@@ -124,6 +124,11 @@ const Grid = () => {
       // space is already taken
       if (response_data.alreadyTaken === 1) return;
 
+      // double three
+      if (response_data.isDoubleThree === 1) {
+        console.log("Invalid move! - double 3. Go again.");
+        return;
+      }
       await loadBoardFromBackend();
       await checkWinInBackend();
 
@@ -150,7 +155,10 @@ const Grid = () => {
         },
       });
       await loadBoardFromBackend();
-      setText("Player 1's Turn!");
+
+      playerTurn === 1
+        ? (setText("Player 2's Turn!"), setPlayerTurn(2))
+        : (setText("Player 1's Turn!"), setPlayerTurn(1));
       setGameEnded(false);
     } catch (error) {
       console.log("[Error] during resetBoard() PUT request");
@@ -185,7 +193,9 @@ const Grid = () => {
             <Message message={text} />
           </div>
           <div>
-            <button onClick={() => resetBoard()}>Restart Game</button>
+            <button className={styles.resetbutton} onClick={() => resetBoard()}>
+              Reset
+            </button>
           </div>
           <table className={styles.grid}>
             <tbody>

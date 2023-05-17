@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import gameService from "./service.js";
 
-dotenv.config();
+dotenv.config({ path: "src/pages/backend/.env" });
 
 const app = express();
 const port = process.env.PORT;
