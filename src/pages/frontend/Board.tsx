@@ -178,6 +178,19 @@ const Grid = () => {
     return;
   };
 
+  // updates board every 2 seconds -> emulate real-time effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadBoardFromBackend();
+    }, 2000);
+
+    // Clean up interval on unmount
+    return () => {
+      console.log("Grid is unmounting...");
+      clearInterval(interval);
+    };
+  }, []); // Empty array indicates that this effect does not depend on any values and will not re-run
+
   return (
     <div>
       <div className={styles.container}>
