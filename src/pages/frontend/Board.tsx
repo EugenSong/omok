@@ -7,6 +7,8 @@ import mushroom from "../../../public/mushroom.png";
 import slime from "../../../public/slime.png";
 import Image from "next/image";
 
+import firebaseService from "../../pages/backend/firebase";
+
 // Grid skeleton
 const Grid = () => {
   const BOARD_LEN = 19; // 19x19
@@ -199,6 +201,10 @@ const Grid = () => {
           <div>
             <Image src={mushroom} alt="Mushroom Image" />
           </div>
+        </div>
+
+        <div>
+          <button onClick={() => firebaseService.createGame()}>Firebase</button>
         </div>
 
         <div className={styles.labelandtable}>
