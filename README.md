@@ -1,4 +1,3 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 
 ## Omok (5-in-a-row) demo
@@ -7,3 +6,14 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 
 
+## Technologies
+- Project built on Next.js bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app)
+- Node.js 
+- React 
+- Firebase 
+
+### Architecture: 
+- Client (frontend) - Server (backend) - Database 
+
+### Assets:
+- [`Maplestory Wiki`](https://maplestory.wiki/)
