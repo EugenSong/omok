@@ -1,17 +1,12 @@
-// Import the functions you need from the SDKs you need
 
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-//import { getFunctions } from "firebase/functions";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs } from "firebase/firestore";
 
 import { v4 as uuidv4 } from 'uuid';
+import gameService from "./service";
 
-const BOARD_LEN = 19
-const board = Array(BOARD_LEN)
-  .fill(0)
-  .map(() => Array(BOARD_LEN).fill(0));
-
+//import { getFunctions } from "firebase/functions";
 //https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
@@ -54,7 +49,7 @@ const createBoardObject = (board, BOARD_LEN) => {
   return object;
 }
 
-const boardObject = createBoardObject(board, BOARD_LEN);
+const boardObject = createBoardObject(gameService.board, gameService.BOARD_LEN);
 
 const createGame = async () => {
   try {
@@ -62,24 +57,48 @@ const createGame = async () => {
     // assign game unique id
     const uuid = generateUUID();
 
-    // add a single game (document) in 'games' collection 
+    // add a single game (document) in 'games' collection ... so far just adds the first game with no player / move
     const docRef = await addDoc(collection(db, "games"), {
       board_uid: uuid,
       board: boardObject,
+      isOngoing: true,
     });
 
     console.log("Document written with ID: ", docRef.id);
     //console.log("board-object is: ", board_obj);
+
+    return;
 
   } catch (e) {
     console.error("Error adding document: ", e);
   }
 };
 
-export { createGame };
+// finds a game that is NOT isOngoing
+const findGames = async () => {
+  try {
+
+    const docRefs = await getDocs(collection(db, "games"));
+
+    // lists out all games in 'games' collection
+    docRefs.forEach((doc) => {
+      console.log(`${doc.id} => ${doc.data().board_uid}`);
+
+      console.log(`board is ${doc.data().board}`);
+    });
+
+    return;
+
+  } catch (e) {
+    console.error("Error reading from games collection");
+  }
+};
+
+
 
 const firebaseService = {
   createGame,
+  findGames,
 };
 
 export default firebaseService;

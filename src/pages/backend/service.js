@@ -546,14 +546,6 @@ const hasAFourInARow = (x, y, playerPiece) => {
   return false;
 };
 
-export {
-  updateBoard,
-  copyBoard,
-  resetBoard,
-  getPlayerTurn,
-  updatePlayerTurn,
-  checkForWinner,
-};
 
 const gameService = {
   updateBoard,
@@ -562,6 +554,8 @@ const gameService = {
   getPlayerTurn,
   updatePlayerTurn,
   checkForWinner,
+  BOARD_LEN,
+  board,
 };
 
 export default gameService;

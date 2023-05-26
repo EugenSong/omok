@@ -203,9 +203,19 @@ const Grid = () => {
           </div>
         </div>
 
-        <div>
-          <button onClick={() => firebaseService.createGame()}>Firebase</button>
+        {/* tester functions linked to buttons to test firebase services */}
+        {/* <div>
+          <button onClick={() => firebaseService.createGame()}>
+            Firebase Store Game
+          </button>
         </div>
+
+        <div>
+          <button onClick={() => firebaseService.findGames()}>
+            {" "}
+            Firebase Find Games
+          </button>
+        </div> */}
 
         <div className={styles.labelandtable}>
           <div className={styles.messagelabel}>
