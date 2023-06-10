@@ -6,8 +6,11 @@ import { collection, addDoc, getDocs } from "firebase/firestore";
 import { v4 as uuidv4 } from 'uuid';
 import gameService from "./service";
 
+import { getAuth } from 'firebase/auth'
+
 //import { getFunctions } from "firebase/functions";
 //https://firebase.google.com/docs/web/setup#available-libraries
+
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -19,14 +22,19 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
 // Initialize Cloud Firestore and get a reference to the service
 const db = getFirestore(app);
 
-// Initialize Cloud Functions and get ref to the service
-//const functions = getFunctions(app);
+
+// Get the auth instance from the already initialized Firebase app
+const auth = getAuth(app);
+
+
+
 
 
 const generateUUID = () => {
@@ -40,8 +48,8 @@ const createBoardObject = (board, BOARD_LEN) => {
 
   // quick and simple  algo to construct object from 2-d array
   // loop both arrays -> create key -> store original value into new object's hashmap 
-  for (let i = 0; i < board.length; i++) {
-    for (let j = 0; j < board[i].length; j++) {
+  for (let i = 0; i < BOARD_LEN; i++) {
+    for (let j = 0; j < BOARD_LEN; j++) {
       const key = `${i}-${j}`;
       object[key] = board[i][j];
     }
@@ -99,6 +107,9 @@ const findGames = async () => {
 const firebaseService = {
   createGame,
   findGames,
+  auth,
+
+
 };
 
 export default firebaseService;

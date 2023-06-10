@@ -10,6 +10,7 @@
 }
 
 .grid td {
+  min-width: 35px; /* Adjust the value as needed */
   width: 35px;
   height: 35px;
   background-color: transparent;
@@ -29,7 +30,7 @@
 } */
 
 .grid {
-  table-layout: fixed;
+  table-layout: auto;
   background-color: transparent;
   margin: 0 auto;
   display: flex;
@@ -54,6 +55,7 @@
 }
 
 .container {
+  overflow-x: auto;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -103,4 +105,18 @@
   -webkit-user-select: none;
   touch-action: manipulation;
   white-space: nowrap;
+}
+
+.login {
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.errmessage {
+  font-weight: 500;
+  color: crimson;
 }

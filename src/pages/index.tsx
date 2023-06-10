@@ -1,10 +1,7 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import styles from '@/styles/Home.module.css'
-import Grid from './frontend/Board'
+import Head from "next/head";
+import styles from "@/styles/Home.module.css";
 
-
+import LoginForm from "./frontend/LoginForm";
 
 export default function Home() {
   return (
@@ -16,12 +13,10 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <h1>Omok - Connect 5</h1>
         <div>
-      <Grid />
+          <LoginForm />
         </div>
       </main>
-      
     </>
-  )
+  );
 }

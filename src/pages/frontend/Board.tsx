@@ -9,8 +9,8 @@ import Image from "next/image";
 
 import firebaseService from "../../pages/backend/firebase";
 
-// Grid skeleton
-const Grid = () => {
+// Board skeleton
+const Board = () => {
   const BOARD_LEN = 19; // 19x19
 
   // define the URLs for each player's piece
@@ -203,20 +203,6 @@ const Grid = () => {
           </div>
         </div>
 
-        {/* tester functions linked to buttons to test firebase services */}
-        {/* <div>
-          <button onClick={() => firebaseService.createGame()}>
-            Firebase Store Game
-          </button>
-        </div>
-
-        <div>
-          <button onClick={() => firebaseService.findGames()}>
-            {" "}
-            Firebase Find Games
-          </button>
-        </div> */}
-
         <div className={styles.labelandtable}>
           <div className={styles.messagelabel}>
             <Message message={text} />
@@ -256,7 +242,7 @@ const Grid = () => {
   );
 };
 
-export default Grid;
+export default Board;
 
 /*  ***** Aside on useEffect() hook *******
     // need to have a useEffect() to console.log(omok-board) b/c loadBoardFromBackend() is async call so the state might be updated by the time I call console.log(omok-board) right after it to see the changes
