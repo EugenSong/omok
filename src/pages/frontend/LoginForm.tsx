@@ -6,8 +6,6 @@ import { useRouter } from "next/router";
 
 import styles from "@/styles/Home.module.css";
 
-import logout from "../util-functs/logout";
-
 // Called a  Functional component
 const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -24,6 +22,7 @@ const LoginForm = () => {
     return;
   };
 
+  // useEffect to track local storage "user" @ startup --> set existing user and nav to game
   useEffect(() => {
     const loggedInUser = localStorage.getItem("user");
     if (loggedInUser) {
@@ -97,10 +96,8 @@ const LoginForm = () => {
         type="password"
         onChange={(e) => setPassword(e.target.value)}
       />
-      <button onClick={() => signIn}>Sign In</button>
-      <button onClick={() => logout(setUser, setEmail, setPassword)}>
-        logout
-      </button>
+      <button onClick={() => signIn()}>Sign In</button>
+      
     </div>
   );
 };

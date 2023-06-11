@@ -7,8 +7,6 @@ import mushroom from "../../../public/mushroom.png";
 import slime from "../../../public/slime.png";
 import Image from "next/image";
 
-import firebaseService from "../../pages/backend/firebase";
-
 // Board skeleton
 const Board = () => {
   const BOARD_LEN = 19; // 19x19

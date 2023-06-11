@@ -1,15 +1,18 @@
 import React from "react";
 import Head from "next/head";
-
 import styles from "@/styles/Home.module.css";
 import Board from "./Board";
-
 import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 
 const Game = () => {
-
   // persist user from Login Page by grabbing from localStorage
   const [user, setUser] = useState(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const router = useRouter(); // Hooks can only exist in functional components 
+
   useEffect(() => {
     const loggedInUser = localStorage.getItem("user");
     if (loggedInUser) {
@@ -17,6 +20,20 @@ const Game = () => {
       setUser(foundUser);
     }
   }, []);
+
+  const navigateToHome = () => {
+    // one method to nav pages
+    router.push("/frontend/LoginForm");
+    return;
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setEmail("");
+    setPassword("");
+    localStorage.clear();
+    navigateToHome();
+  };
 
   return (
     <>
@@ -32,6 +49,13 @@ const Game = () => {
           <div>{(user as any).email} is logged in</div>
         ) : null}
         <h1>Omok - Connect 5</h1>
+        <button
+          onClick={() => {
+            handleLogout();
+          }}
+        >
+          logout
+        </button>
         <div>
           <Board />
         </div>

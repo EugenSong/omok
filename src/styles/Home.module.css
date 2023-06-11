@@ -114,6 +114,10 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
+
+  /* this background color css needs to be applied again to .login to handle 
+  a navigate back to login page */
+  background-color: #454545;
 }
 
 .errmessage {
