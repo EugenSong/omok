@@ -11,7 +11,7 @@ const Game = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const router = useRouter(); // Hooks can only exist in functional components 
+  const router = useRouter(); // Hooks can only exist in functional components
 
   useEffect(() => {
     const loggedInUser = localStorage.getItem("user");
@@ -43,11 +43,8 @@ const Game = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      
       <main className={styles.main}>
-        {/* Conditionally render the user email */}
-        {user && (user as any).email ? (
-          <div>{(user as any).email} is logged in</div>
-        ) : null}
         <h1>Omok - Connect 5</h1>
         <button
           onClick={() => {
@@ -56,6 +53,13 @@ const Game = () => {
         >
           logout
         </button>
+
+        <div>
+          {/* Conditionally render the user email */}
+          {user && (user as any).email ? (
+            <div>{(user as any).email} is logged in</div>
+          ) : null}
+        </div>
         <div>
           <Board />
         </div>
