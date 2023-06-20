@@ -1,16 +1,12 @@
 import React, { useEffect } from "react";
-import firebaseService from "../backend/firebase";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { useState } from "react";
 import { useRouter } from "next/router";
-
 import styles from "@/styles/Home.module.css";
-
-import show from "../../../public/show.png";
-import hide from "../../../public/hide.png";
+import firebaseAuth from "../backend/firebase-auth";
 
 // Called a  Functional component
 const LoginForm = () => {
@@ -47,7 +43,7 @@ const LoginForm = () => {
   const signUp = async () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(
-        firebaseService.auth,
+        firebaseAuth.auth,
         email,
         password
       );
@@ -93,7 +89,7 @@ const LoginForm = () => {
   const logIn = async () => {
     try {
       const userCredential = await signInWithEmailAndPassword(
-        firebaseService.auth,
+        firebaseAuth.auth,
         email,
         password
       );
@@ -140,7 +136,6 @@ const LoginForm = () => {
 
   return (
     <div className={styles.login}>
-      
       <div>
         <p>Login page.</p>
       </div>

@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import gameService from "./service.js";
+import gameService from "./game-service.js";
 
 // dotenv.config({ path: "src/pages/backend/.env" });
 

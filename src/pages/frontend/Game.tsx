@@ -43,7 +43,7 @@ const Game = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      
+
       <main className={styles.main}>
         <h1>Omok - Connect 5</h1>
         <button
@@ -52,6 +52,30 @@ const Game = () => {
           }}
         >
           logout
+        </button>
+
+        <button
+          onClick={async () => {
+            try {
+              // Make a GET request to the API endpoint
+              const response = await fetch("/api/find-all-games");
+              // Check if the response is ok (status code in the range 200-299)
+              if (!response.ok) {
+                throw new Error("Network response was not ok");
+              }
+              // Parse the response body as JSON
+              const data = await response.json();
+              // Do something with the data
+              console.log(data);
+            } catch (error) {
+              console.error(
+                "There has been a problem with your fetch operation:",
+                error
+              );
+            }
+          }}
+        >
+          Fetch Games
         </button>
 
         <div>
