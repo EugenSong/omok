@@ -5,14 +5,22 @@ import admin from "firebase-admin";
 import serviceAccount from "../backend/key.json" assert { type: "json" };
 
 type Data = {
-  message: string;
+  message?: string;
+  error?: {
+    message: string;
+    code?: number;
+  };
 };
 
 // Initialize Firebase
-admin.initializeApp({
-  //@ts-ignore
-  credential: admin.credential.cert(serviceAccount),
-});
+if (!admin.apps.length) {
+  // need this to ensure multiple Firebase instances are not running
+  admin.initializeApp({
+    //@ts-ignore
+    credential: admin.credential.cert(serviceAccount),
+  });
+}
+
 // Initialize Cloud Firestore and get a reference to the service
 const db = admin.firestore();
 
@@ -37,7 +45,7 @@ const createBoardObject = (board: number[][], BOARD_LEN: number) => {
 
 const boardObject = createBoardObject(gameService.board, gameService.BOARD_LEN);
 
-const createGame = async () => {
+const createGame = async (user: any) => {
   try {
     // assign game unique id
     const uuid = generateUUID();
@@ -49,6 +57,7 @@ const createGame = async () => {
       board_uid: uuid,
       board: boardObject,
       isOngoing: true,
+      user: user, // If you need to save the user information with the game
     });
 
     console.log("Document written with ID: ", newGameRef.id);
@@ -59,14 +68,53 @@ const createGame = async () => {
   }
 };
 
+const searchForOpenGame = async () => {
+  try {
+    const gamesRef = db.collection("games");
+    const snapshot = await gamesRef.get();
+    console.log("Firestore snapshot:", snapshot); // Log the Firestore snapshot
+
+    for (let doc of snapshot.docs) {
+      let game = doc.data();
+
+      let userData = JSON.parse(game.user);
+
+      console.log("Game is ", game);
+      console.log("game.user.email is ", userData.email);
+
+      if (!userData.isOngoing || userData.email === "maplestory@gmail.com") {
+        console.log("returning from searchForOpenGame");
+        return game; // Return the found game
+      }
+    }
+  } catch (error) {
+    console.error("There has been a problem with your fetch operation:", error);
+  }
+};
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  try {
-    await createGame();
-    res.status(200).json({ message: "John Doe" });
-  } catch (error) {
-    res.status(500).json({ message: "Something went wrong" });
+  if (req.method === "POST") {
+    try {
+      // first search for existing game with notOngoing (FIX LATER for OPP COND) or for already existing email in game
+      const game = await searchForOpenGame();
+      if (game) {
+        console.log("Game found: ", game);
+        res.status(200).json({ message: "A Game already exists." });
+      } else {
+        console.log("No game found");
+        // Extract the user from the request body
+        const { user } = req.body;
+        await createGame(user);
+        res.status(200).json({ message: "A new Game was created." });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Something went wrong" });
+    }
+  } else {
+    // Optionally handle other HTTP methods, or send a response that the method is not allowed
+    res.status(405).json({ error: { message: "Method not allowed" } });
   }
 }
