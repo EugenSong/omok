@@ -2,6 +2,7 @@ import React from "react";
 import Head from "next/head";
 import styles from "@/styles/Home.module.css";
 import Board from "./Board";
+import Board2 from "./Board2";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 
@@ -78,6 +79,44 @@ const Game = () => {
           Fetch Games
         </button>
 
+        <button
+          onClick={async () => {
+            try {
+              // to have information about the logged-in user on the server-side, you'll have to send that information as part of the request >>> `body` param
+              const loggedInUser = localStorage.getItem("user");
+              if (loggedInUser) {
+                const user = JSON.parse(loggedInUser);
+                // Make a POST request to the API endpoint
+                const response = await fetch("/api/join-game", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({ user: loggedInUser }),
+                });
+
+                // Check if the response is ok (status code in the range 200-299)
+                if (!response.ok) {
+                  throw new Error("Network response was not ok");
+                }
+
+                // Parse the response body as JSON
+                const data = await response.json();
+
+                // Do something with the data
+                console.log(data);
+              }
+            } catch (error) {
+              console.error(
+                "There has been a problem with your fetch operation:",
+                error
+              );
+            }
+          }}
+        >
+          Join a Game
+        </button>
+
         <div>
           {/* Conditionally render the user email */}
           {user && (user as any).email ? (
@@ -85,7 +124,7 @@ const Game = () => {
           ) : null}
         </div>
         <div>
-          <Board />
+          <Board2 />
         </div>
       </main>
     </>

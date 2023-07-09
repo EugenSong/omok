@@ -29,35 +29,37 @@ const generateUUID = () => {
 };
 
 // func to create a board object to store in firebase (firebase does not support nested arrays)
-const createBoardObject = (board: number[][], BOARD_LEN: number) => {
-  const object: Record<string, number> = {};
-
-  // quick and simple  algo to construct object from 2-d array
-  // loop both arrays -> create key -> store original value into new object's hashmap
-  for (let i = 0; i < BOARD_LEN; i++) {
-    for (let j = 0; j < BOARD_LEN; j++) {
-      const key = `${i}-${j}`;
-      object[key] = board[i][j];
-    }
-  }
-  return object;
+// stores a map of arrays (aka object of arrays) 
+const createBoardObject = (board: number[][]) => {
+  return board.reduce((acc: Record<string, any>, curr, idx) => {
+    acc[`${idx}`] = curr;
+    return acc;
+  }, {} as Record<string, any>);
 };
 
-const boardObject = createBoardObject(gameService.board, gameService.BOARD_LEN);
 
 const createGame = async (user: any) => {
   try {
+
+    const boardObject = createBoardObject(
+      gameService.board
+    );
+
     // assign game unique id
     const uuid = generateUUID();
 
     // add a single game (document) in 'games' collection ... so far just adds the first game with no player / move
     const newGameRef = db.collection("games").doc();
 
+    // create a user object out of user json
+    let userObject = JSON.parse(user);
+
     await newGameRef.set({
       board_uid: uuid,
       board: boardObject,
       isOngoing: true,
-      user: user, // If you need to save the user information with the game
+      player1: userObject.email, // If you need to save the user information with the game
+      player2: "",
     });
 
     console.log("Document written with ID: ", newGameRef.id);
@@ -68,21 +70,23 @@ const createGame = async (user: any) => {
   }
 };
 
-const searchForOpenGame = async () => {
+const searchForExistingGame = async (currentUserEmail: any) => {
   try {
     const gamesRef = db.collection("games");
     const snapshot = await gamesRef.get();
-    console.log("Firestore snapshot:", snapshot); // Log the Firestore snapshot
+    // console.log("Firestore snapshot:", snapshot); // Log the Firestore snapshot
 
     for (let doc of snapshot.docs) {
+      console.log("doc is ", doc); // doc is of type QueryDocumentSnapshot  ---> need to conv to JS object to manipulate
+
+      // returns a DocumentData object, which is essentially a JavaScript object that represents your document's data ----> no need to JSON.parse(game)
       let game = doc.data();
+      console.log("doc.data() is ", game);
 
-      let userData = JSON.parse(game.user);
+      // use dot notation b/c game is now JS obj
+      console.log("game.user.email is ", game.player1);
 
-      console.log("Game is ", game);
-      console.log("game.user.email is ", userData.email);
-
-      if (!userData.isOngoing || userData.email === "maplestory@gmail.com") {
+      if (game.isOngoing && game.player1 === currentUserEmail) {
         console.log("returning from searchForOpenGame");
         return game; // Return the found game
       }
@@ -99,10 +103,20 @@ export default async function handler(
   if (req.method === "POST") {
     try {
       // first search for existing game with notOngoing (FIX LATER for OPP COND) or for already existing email in game
-      const game = await searchForOpenGame();
+
+      // turn json string into an js object using JSON.parse to access fields
+      let userData = JSON.parse(req.body.user);
+
+      console.log("req.body [user] is", userData);
+      console.log("currentUserEmail in the handler is ", userData.email);
+      const game = await searchForExistingGame(userData.email);
       if (game) {
         console.log("Game found: ", game);
-        res.status(200).json({ message: "A Game already exists." });
+        res
+          .status(200)
+          .json({
+            message: "A Game already exists. Joining the existing game...",
+          });
       } else {
         console.log("No game found");
         // Extract the user from the request body
