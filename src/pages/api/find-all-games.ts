@@ -2,6 +2,19 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import admin from "firebase-admin";
 import serviceAccount from "../backend/key.json" assert { type: "json" };
 
+interface Game {
+  board: Map<number, number[]>;
+  board_uid: string;
+  isOngoing: boolean;
+  player1: string;
+  player2: string;
+  // ...any other fields from the document...
+}
+
+interface GameWithID extends Game {
+  id: string;
+}
+
 // Define the shape of your document --> data can take Array
 type ApiResponse = {
   data?: Array<{ [key: string]: any }>;
@@ -12,7 +25,8 @@ type ApiResponse = {
 };
 
 // Initialize Firebase
-if (!admin.apps.length) {   // need this to ensure multiple Firebase instances are not running
+if (!admin.apps.length) {
+  // need this to ensure multiple Firebase instances are not running
   admin.initializeApp({
     //@ts-ignore
     credential: admin.credential.cert(serviceAccount),
@@ -29,14 +43,22 @@ export default async function handler(
   if (req.method === "GET") {
     try {
       const gamesRef = db.collection("games");
-      const response = await gamesRef.get();
+      const snapshot = await gamesRef.get();
 
-      let responseData: Array<{ [key: string]: any }> = [];
+      // Initialize an array to hold the games
+      let games: GameWithID[] = [];
 
-      response.forEach((doc) => {
-        responseData.push(doc.data());
+      // Loop through each document in the snapshot
+      snapshot.forEach((doc) => {
+        // Add the document data and the document ID to the games array
+        games.push({
+          id: doc.id,
+          ...(doc.data() as Game),
+        });
       });
-      res.json({ data: responseData }); // Use res.json() for JSON data
+
+      // Respond with the games
+      res.status(200).json({ data: games });
     } catch (e) {
       console.error(e);
       // Send an error response

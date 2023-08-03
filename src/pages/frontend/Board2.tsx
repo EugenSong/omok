@@ -22,13 +22,136 @@ const Board2 = () => {
       .map(() => Array(BOARD_LEN).fill(""))
   );
 
-  // label state
-  const [text, setText] = useState("Player 1's Turn!");
-
+  const [text, setText] = useState("Player 1's Turn!"); // label state
   // player turn state to have label sync up with passing turn in the backend
   const [playerTurn, setPlayerTurn] = useState<number>(1);
-
   const [gameEnded, setGameEnded] = useState<boolean>(false);
+  const [game, setGame] = useState(null); // state for curr game in localstorage
+  const [user, setUser] = useState(null); // state for curr user in localstorage
+
+  // useEffect to track local storage "user" / existing "game" @ startup --> set as curr user and update board
+  useEffect(() => {
+    const loggedInUser = localStorage.getItem("user");
+    if (loggedInUser) {
+      const foundUser = JSON.parse(loggedInUser); // JSON.parse() turns JSON object into Javascript object
+      setUser(foundUser);
+    }
+  }, []);
+
+  // second useEffect to observe user for changes
+  useEffect(() => {
+    // game is already in DB and cached -> pull up the game
+    const currentGame = localStorage.getItem("game");
+    if (user && !currentGame) {
+      lookForOpenGame(); // handles case where there is no games / no open game --> create a new one
+    } else {
+      // track local storage "game" @ startup --> set as existing game and populate board with curr game
+      if (user && currentGame) {
+        console.log("currentGame is: ", currentGame);
+        const foundGame = JSON.parse(currentGame); // JSON.parse() turns JSON object into Javascript object
+        setGame(foundGame); // TASK: *** SEE BELOW useEffect ***
+      }
+    }
+  }, [user]);
+
+  // observe and update client's omok board when 'game' state change
+  useEffect(() => {
+    // TASK: **** update client_omok_board to the value of game.board *****
+  }, [game]);
+
+  const lookForOpenGame = async () => {
+    try {
+      console.log("lookForOpenGame running");
+      // Make a GET request to the API endpoint
+      const response = await fetch("/api/find-all-games");
+      // Check if the response is ok (status code in the range 200-299)
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      // Parse the response body as JSON
+      const data = await response.json();
+      // no games exist in the database
+      if (!data.data.length) {
+        console.log("No games found. Starting a new game...");
+        // TASK: **** create a game and join player1 field ***** + update 'game' state to fresh game
+
+       
+      } else {  // there exists games in games db
+        console.log("data is ", data);
+        console.log("data.data is ", data.data);
+
+        // iterate through all games to search for one that has a player in player1 field
+        let index = 0;
+        for (let game of data.data) {
+          console.log("game.isOngoing is ", game.isOngoing);
+          console.log("!game.isOngoing is ", !game.isOngoing);
+          // if game is not ongoing OR there are already 2 players, skip game
+          if (!game.isOngoing || (game.player1 && game.player2)) {
+            index++;
+            console.log(
+              "!game.isOngoing passed OR (game.player1 && game.player2 passed.) This game is no longer played OR is currently occupied by 2 other players and will be skipped."
+            );
+            continue;
+          }
+
+          // testing purposes ... delete later
+          if (game.player1) {
+            console.log("game.player1 passed");
+            console.log(
+              `Game ${index} has a player in player1 field: ${game.player1}`
+              // normal, common case --> insert curr player/client into player2 field
+            );
+            // returns the proper game uid for an open game
+            console.log("the game_uid for this is ", game.board_uid);
+
+            // retrieves the document id of game
+            console.log("the document id of this game is", game.id);
+
+            console.log("current user is", (user as any).email);
+          }
+
+          // if player1 slot is filled and player2 isnt --> assign curr to player2 field
+          if (game.player1 && !game.player2) {
+            console.log("game.player1 && !game.player2 passed");
+
+            // set curr player / client as player2
+            await fetch("/api/add-curr-player-p2", {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+
+              body: JSON.stringify({
+                documentId: game.id, // game doc id
+                player2: (user as any).email, // curr client user
+              }),
+            });
+            // **** TASK: need to return the joined game and setGame state ****
+
+            // Break search through games list to end search of games b/c found 1 to load
+            break;
+          } else {
+            console.log(
+              `Game ${index} has a player in player1 and player2 field OR there are no open games`
+            );
+          }
+          index++; // remove references to index later on ... currently no use
+        }
+        // if I haven't already joined / found an open game after iterating all games
+
+        console.log("For first item, data.data[0] is ", data.data[0]);
+        console.log(
+          "Iterated through all possible games and have not returned from it yet... Create a fresh game with curr user"
+        );
+        // TASK: **** need to create a fresh game with user as player1 b/c there exists no game w/ game.player1 *****
+      }
+    } catch (error) {
+      console.error(
+        "There has been a problem with your fetch operation:",
+        error
+      );
+    }
+  };
 
   // asyncronously fetch board and update client-side board - works ...
   const loadBoardFromFirebaseBackend = async () => {
@@ -37,16 +160,14 @@ const Board2 = () => {
 
     // Check if the response is ok (status code in the range 200-299)
     if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
+      throw new Error("Network response was not ok");
+    }
 
     // conv to json - don't forget await since promise
     const response_data = await response.json();
 
     // get the board from the response data
     const response_data_board = response_data.board;
-
-    // *************************** WORKING HERE ************************************
 
     // map over the response data and replace the numbers with the corresponding asset URLs
     const client_board_with_assets = response_data_board.map((row: any[]) =>
@@ -57,7 +178,7 @@ const Board2 = () => {
           return player2Piece;
         } else {
           return " "; // empty cell
-        } 
+        }
       })
     );
 

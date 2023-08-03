@@ -25,6 +25,7 @@ const LoginForm = () => {
 
   // one method to nav pages - has to be in functional component ; not embedded
   const router = useRouter();
+  
   const navigateToGame = () => {
     router.push("/frontend/Game");
     return;
