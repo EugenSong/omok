@@ -34,6 +34,7 @@ const Board2 = () => {
     const loggedInUser = localStorage.getItem("user");
     if (loggedInUser) {
       const foundUser = JSON.parse(loggedInUser); // JSON.parse() turns JSON object into Javascript object
+      console.log("loggedInUser found - setting user as foundUser ", foundUser);
       setUser(foundUser);
     }
   }, []);
@@ -41,23 +42,138 @@ const Board2 = () => {
   // second useEffect to observe user for changes
   useEffect(() => {
     // game is already in DB and cached -> pull up the game
-    const currentGame = localStorage.getItem("game");
-    if (user && !currentGame) {
-      lookForOpenGame(); // handles case where there is no games / no open game --> create a new one
-    } else {
+    const currentGameString = localStorage.getItem("game");
+    const currentGame = JSON.parse(currentGameString as string); // Parsing the string to JSON to use values
+    // JSON.parse(currentGameString as string), TypeScript will recognize it as an any type.
+
+    const currentUserString = localStorage.getItem("user"); 
+    const currentUser = JSON.parse(currentUserString as string); 
+    console.log(
+      "currentGame is the following before conditionals: ",
+      currentGame
+    );
+
+    // case 1 - user but no local stored game (user is logged on but no existing game)
+    if (currentUser && !currentGame) {
+      console.log(
+        "There IS a User but NO currentGame...waiting for User to perform an action."
+      );
+      return;
+      // setAGame() will go belong in a button for user to search for game or to initialize a new game and join it as p1
+
+    // case 2 - user and locally stored game (user is logged on and is playing a game)
+    } else if (currentUser && currentGame) {
       // track local storage "game" @ startup --> set as existing game and populate board with curr game
-      if (user && currentGame) {
-        console.log("currentGame is: ", currentGame);
-        const foundGame = JSON.parse(currentGame); // JSON.parse() turns JSON object into Javascript object
-        setGame(foundGame); // TASK: *** SEE BELOW useEffect ***
-      }
+
+      console.log("currentUser is the following in user && currentGame ", currentUser);
+      console.log(
+        "currentUser[email] is the following in user && currentGame ",
+        currentUser.email
+      );
+      console.log(
+        "currentGame is the following in user && currentGame ",
+        currentGame
+      );
+      console.log(
+        "currentGame.board_uid is the following in user && currentGame ",
+        currentGame.board_uid
+      );
+
+      const lookUpGame = async () => {
+        // look for existing game in db
+        const response = await fetch("/api/search-for-game-id", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user: currentUser.email, // curr client user
+            gameid: currentGame.board_uid, // game doc id
+          }),
+        });
+
+        // Check if the response is ok (status code in the range 200-299)
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+
+        // Parse the response body as JSON
+        const data = await response.json();
+        console.log('data in lookUpGame is: ', data); 
+        setGame(data); // TASK: *** SEE BELOW useEffect *** // change the visual board after changing 'game' state
+        
+      };
+
+      lookUpGame();
     }
   }, [user]);
 
-  // observe and update client's omok board when 'game' state change
-  useEffect(() => {
-    // TASK: **** update client_omok_board to the value of game.board *****
-  }, [game]);
+  // *** TASK attach setAGame() to a button later -->  when user wants to join a game ***
+  // *** TASK #2 --> in for loop after I set game in localStorage, update visual board by creating a useEffect to track 'game' state var 
+  const setAGame = async () => {
+    // Make a GET request to the API endpoint
+    const response = await fetch("/api/find-all-games");
+    // Check if the response is ok (status code in the range 200-299)
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    // Parse the response body as JSON
+    const data = await response.json();
+    // no games exist in the database
+    if (!data.data.length) {
+      console.log("No games found. Starting a new game...");
+      // TASK: **** create a game and join player1 field ***** + update 'game' state to fresh game
+    } else {
+      // there exists games in games db
+      console.log("data is ", data);
+      console.log("data.data is ", data.data);
+
+      // iterate through all games to search for one that has a player in player1 field
+      for (let game of data.data) {
+        console.log("game.isOngoing is ", game.isOngoing);
+        console.log("!game.isOngoing is ", !game.isOngoing);
+        console.log(game);
+        setGame(game);
+        localStorage.setItem("game", JSON.stringify(game));
+
+
+      }
+    }
+  };
+
+  // // TASK **** observe and update client's omok board when 'game' state change *** finish this part too 
+  // useEffect(() => {
+  //   if (game !== null) {
+  //     console.log("game in useEffect when game changes is...", game);
+  //     // TASK: **** update client_omok_board to the value of game.board *****
+  //     const conv_number_board = convertToObjectArray((game as any).board);
+
+  //     // map over the response data and replace the numbers with the corresponding asset URLs
+  //     const client_board_with_assets = conv_number_board.map((row: any[]) =>
+  //       row.map((cellValue) => {
+  //         if (cellValue === 1) {
+  //           return player1Piece;
+  //         } else if (cellValue === 2) {
+  //           return player2Piece;
+  //         } else {
+  //           return " "; // empty cell
+  //         }
+  //       })
+  //     );
+
+  //     // Convert the 2-d array of objects board to an array of strings (URLS to set state)
+  //     const client_board_with_strings = client_board_with_assets.map(
+  //       (row: any) => row.map((asset: any) => asset.src)
+  //     );
+
+  //     // fill state board using fetched, converted data
+  //     setClientBoard(client_board_with_strings);
+  //   }
+  // }, [game]);
+
+  const convertToObjectArray = (obj: Record<string, any>): number[][] => {
+    return Object.keys(obj).map((key) => obj[key]);
+  };
 
   const lookForOpenGame = async () => {
     try {
@@ -74,9 +190,8 @@ const Board2 = () => {
       if (!data.data.length) {
         console.log("No games found. Starting a new game...");
         // TASK: **** create a game and join player1 field ***** + update 'game' state to fresh game
-
-       
-      } else {  // there exists games in games db
+      } else {
+        // there exists games in games db
         console.log("data is ", data);
         console.log("data.data is ", data.data);
 
@@ -337,6 +452,9 @@ const Board2 = () => {
           <div>
             <button className={styles.resetbutton} onClick={() => resetBoard()}>
               Reset
+            </button>
+            <button className={styles.resetbutton} onClick={() => setAGame()}>
+              Set A Game Into Local Storage
             </button>
           </div>
           <table className={styles.grid}>

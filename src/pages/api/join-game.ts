@@ -70,31 +70,50 @@ const createGame = async (user: any) => {
   }
 };
 
+// const searchForExistingGame = async (currentUserEmail: any) => {
+//   try {
+//     const gamesRef = db.collection("games");
+//     const snapshot = await gamesRef.get();
+//     // console.log("Firestore snapshot:", snapshot); // Log the Firestore snapshot
+
+//     for (let doc of snapshot.docs) {
+//       console.log("doc is ", doc); // doc is of type QueryDocumentSnapshot  ---> need to conv to JS object to manipulate
+
+//       // returns a DocumentData object, which is essentially a JavaScript object that represents your document's data ----> no need to JSON.parse(game)
+//       let game = doc.data();
+//       console.log("doc.data() is ", game);
+
+//       // use dot notation b/c game is now JS obj
+//       console.log("game.user.email is ", game.player1);
+
+//       if (game.isOngoing && game.player1 === currentUserEmail) {
+//         console.log("returning from searchForOpenGame");
+//         return game; // Return the found game
+//       }
+//     }
+//   } catch (error) {
+//     console.error("There has been a problem with your fetch operation:", error);
+//   }
+// };
+
 const searchForExistingGame = async (currentUserEmail: any) => {
   try {
     const gamesRef = db.collection("games");
-    const snapshot = await gamesRef.get();
-    // console.log("Firestore snapshot:", snapshot); // Log the Firestore snapshot
+    const snapshot = await gamesRef
+      .where("isOngoing", "==", true)
+      .where("player1", "==", currentUserEmail)
+      .get();
 
     for (let doc of snapshot.docs) {
-      console.log("doc is ", doc); // doc is of type QueryDocumentSnapshot  ---> need to conv to JS object to manipulate
-
-      // returns a DocumentData object, which is essentially a JavaScript object that represents your document's data ----> no need to JSON.parse(game)
       let game = doc.data();
-      console.log("doc.data() is ", game);
-
-      // use dot notation b/c game is now JS obj
-      console.log("game.user.email is ", game.player1);
-
-      if (game.isOngoing && game.player1 === currentUserEmail) {
-        console.log("returning from searchForOpenGame");
-        return game; // Return the found game
-      }
+      console.log("Found game:", game);
+      return game; // Return the found game
     }
   } catch (error) {
     console.error("There has been a problem with your fetch operation:", error);
   }
 };
+
 
 export default async function handler(
   req: NextApiRequest,
