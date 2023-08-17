@@ -4,10 +4,20 @@ import serviceAccount from "../backend/key.json" assert { type: "json" };
 
 type ApiResponse = {
   message?: string;
+  game?: GameData; // Add this line
   error?: {
     message: string;
     code?: number;
   };
+};
+
+type GameData = {
+  id: string;
+  board_uid: string;
+  board: Record<string, any>;
+  isOngoing: boolean;
+  player1: any;
+  player2: string;
 };
 
 // Initialize Firebase
@@ -46,7 +56,23 @@ export default async function handler(
         player2: player2,
       });
 
-      res.status(200).json({ message: "Document updated successfully" });
+      // Fetch the updated document
+      const updatedDoc = await docRef.get();
+
+      // Check if the document exists
+      if (!updatedDoc.exists) {
+        throw new Error("Document not found after updating!");
+      }
+
+      // Convert the document data into GameData format
+      const gameData: GameData = {
+        id: updatedDoc.id,
+        ...(updatedDoc.data() as any),
+      };
+
+      res
+        .status(200)
+        .json({ message: "Document updated successfully", game: gameData });
     } catch (error) {
       console.error("There was an error updating the document: ", error);
 

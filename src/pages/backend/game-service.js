@@ -1,7 +1,5 @@
 const BOARD_LEN = 19;
-const board = Array(BOARD_LEN)
-  .fill(0)
-  .map(() => Array(BOARD_LEN).fill(0));
+
 let playerTurn = 1;
 let startPlayer = 1;
 
@@ -9,7 +7,7 @@ const getPlayerTurn = () => {
   return playerTurn;
 };
 
-const getOpponentsTurn = () => {
+const getOpponentsTurn = (playerTurn) => {
   const opponentTurn = playerTurn === 1 ? 2 : 1;
   return opponentTurn;
 };
@@ -18,7 +16,7 @@ const updatePlayerTurn = (player) => {
   playerTurn = player;
 };
 
-const isValidEmptyCoordinate = (xPos, yPos) => {
+const isValidEmptyCoordinate = (board, xPos, yPos) => {
   // shorthand for... if (condition) return true ; return false;
   return (
     xPos >= 0 &&
@@ -30,37 +28,40 @@ const isValidEmptyCoordinate = (xPos, yPos) => {
 };
 
 // updateBoard() contains checks for double three inside AND for double three edge case... abstract those parts for simpler, clean code
-const updateBoard = (playerPiece, xPos, yPos) => {
-  // spot is already taken by either player - check this corner case first!
-  if (board[xPos][yPos] === 1 || board[xPos][yPos] === 2) return 2;
+const updateBoard = (playerTurn, xPos, yPos, board) => {
+  let returnCode = 0;  // This will store the integer we eventually return
 
+  // spot is already taken by either player - check this corner case first!
+  if (board[xPos][yPos] === 1 || board[xPos][yPos] === 2) {
+    returnCode = 2;
+  }
   // place piece on "empty" spot
-  if (isValidEmptyCoordinate(xPos, yPos)) {
-    // check first to see if spot has to be blocked by curr player
-    let opponent = getOpponentsTurn();
+  else if (isValidEmptyCoordinate(board, xPos, yPos)) {
+    let opponent = getOpponentsTurn(playerTurn);
 
     // set to opposing turn and check if it's a win
     board[xPos][yPos] = opponent;
-    //  NOTE: above line unnecessary since isDoubleThree() [countPieces] utilizes offsets from placed piece
-    if (hasAFourInARow(xPos, yPos, opponent)) {
-      board[xPos][yPos] = playerPiece; // let curr player block even if double 3
-      return 1;
+    if (hasAFourInARow(board, xPos, yPos, opponent)) {
+      board[xPos][yPos] = playerTurn;  // let curr player block even if double 3
+      returnCode = 1;
     }
+    else {
+      // place curr piece before checking for double three
+      board[xPos][yPos] = playerTurn;
 
-    // place curr piece before checking for double three
-    board[xPos][yPos] = playerPiece;
-
-    // check for double three placement after placing into board -> return 3
-    if (isDoubleThree(xPos, yPos, playerPiece)) {
-      board[xPos][yPos] = 0;
-      return 3;
+      // check for double three placement after placing into board -> return 3
+      if (isDoubleThree(board, xPos, yPos, playerTurn)) {
+        board[xPos][yPos] = 0;
+        returnCode = 3;
+      } else {
+        returnCode = 1;
+      }
     }
-
-    return 1;
   }
 
-  return 0;
+  return [board, returnCode];
 };
+
 
 const copyBoard = () => {
   const printedBoard = [];
@@ -422,14 +423,14 @@ const directions = [
 ]; // [ right, down, up-right diag, down-left diag]
 
 // function to check that each space is valid and empty
-const isCurrentPieceOrEmpty = (x, y, playerPiece) => {
+const isCurrentPieceOrEmpty = (board, x, y, playerPiece) => {
   if (x < 0 || x >= BOARD_LEN || y < 0 || y >= BOARD_LEN) {
     return false;
   }
   return board[x][y] === playerPiece || board[x][y] === 0; // want to count empty spaces AND my piece
 };
 
-const isEmpty = (x, y) => {
+const isEmpty = (board, x, y) => {
   if (x < 0 || x >= BOARD_LEN || y < 0 || y >= BOARD_LEN) {
     return false;
   }
@@ -437,12 +438,12 @@ const isEmpty = (x, y) => {
 };
 
 // function to check how many pieces in a row given a certain direction
-const countPieces = (x, y, dx, dy, playerPiece) => {
+const countPieces = (board, x, y, dx, dy, playerPiece) => {
   let count = 0;
   let hasEmptySpace = false;
   let encounteredEmpty = false;
 
-  while (isCurrentPieceOrEmpty(x, y, playerPiece)) {
+  while (isCurrentPieceOrEmpty(board, x, y, playerPiece)) {
     if (board[x][y] === playerPiece) {
       count++;
 
@@ -465,12 +466,12 @@ const countPieces = (x, y, dx, dy, playerPiece) => {
 };
 
 // function to check if a move creates a 'double three' situation
-const isDoubleThree = (x, y, playerPiece) => {
+const isDoubleThree = (board, x, y, playerPiece) => {
   let threesCount = 0;
   for (let [dx, dy] of directions) {
     // important part! -> check both sides of spot (curr direction and opposite direction)
-    let countData1 = countPieces(x - dx, y - dy, -dx, -dy, playerPiece);
-    let countData2 = countPieces(x + dx, y + dy, dx, dy, playerPiece);
+    let countData1 = countPieces(board, x - dx, y - dy, -dx, -dy, playerPiece);
+    let countData2 = countPieces(board, x + dx, y + dy, dx, dy, playerPiece);
 
     let totalCount = countData1.count + countData2.count;
     let encounteredEmpty =
@@ -483,11 +484,11 @@ const isDoubleThree = (x, y, playerPiece) => {
     if (totalCount === 4 && encounteredEmpty) {
       // ensure both ends of line are unblocked
       if (
-        isEmpty(
+        isEmpty(board,
           x - (countData1.count + 1) * dx,
           y - (countData1.count + 1) * dy
         ) &&
-        isEmpty(
+        isEmpty(board,
           x + (countData2.count + 1) * dx,
           y + (countData2.count + 1) * dy
         )
@@ -499,7 +500,7 @@ const isDoubleThree = (x, y, playerPiece) => {
 };
 
 // function to check for an existing urgent threat (4 needs to be blocked) in double-3 situation
-const isCurrentPiece = (x, y, playerPiece) => {
+const isCurrentPiece = (board, x, y, playerPiece) => {
   if (x < 0 || x >= BOARD_LEN || y < 0 || y >= BOARD_LEN) {
     return false;
   }
@@ -508,10 +509,10 @@ const isCurrentPiece = (x, y, playerPiece) => {
 };
 
 // function to check how many enemy pieces in a row given a certain direction (double 3, edge case)
-const countPiecesAroundDoubleThree = (x, y, dx, dy, playerPiece) => {
+const countPiecesAroundDoubleThree = (board, x, y, dx, dy, playerPiece) => {
   let count = 0;
 
-  while (isCurrentPiece(x, y, playerPiece)) {
+  while (isCurrentPiece(board, x, y, playerPiece)) {
     count++;
     x += dx;
     y += dy;
@@ -520,17 +521,17 @@ const countPiecesAroundDoubleThree = (x, y, dx, dy, playerPiece) => {
 };
 
 // function to check if move creates a row-in-a-row in any direction given x,y
-const hasAFourInARow = (x, y, playerPiece) => {
+const hasAFourInARow = (board, x, y, playerPiece) => {
   for (let [dx, dy] of directions) {
     // important part! -> check both sides of spot (curr direction and opposite direction)
-    let count1 = countPiecesAroundDoubleThree(
+    let count1 = countPiecesAroundDoubleThree(board,
       x - dx,
       y - dy,
       -dx,
       -dy,
       playerPiece
     );
-    let count2 = countPiecesAroundDoubleThree(
+    let count2 = countPiecesAroundDoubleThree(board,
       x + dx,
       y + dy,
       dx,
@@ -550,12 +551,10 @@ const hasAFourInARow = (x, y, playerPiece) => {
 const gameService = {
   updateBoard,
   copyBoard,
-  resetBoard,
   getPlayerTurn,
   updatePlayerTurn,
   checkForWinner,
   BOARD_LEN,
-  board,
 };
 
 export default gameService;

@@ -17,6 +17,7 @@ interface Game {
   isOngoing: boolean;
   player1: string;
   player2: string;
+  playerTurn: 1,
   // ...any other fields from the document...
 }
 

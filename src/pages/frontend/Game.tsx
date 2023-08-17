@@ -1,7 +1,7 @@
 import React from "react";
 import Head from "next/head";
 import styles from "@/styles/Home.module.css";
-import Board from "./Board";
+
 import Board2 from "./Board2";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
@@ -87,7 +87,7 @@ const Game = () => {
               if (loggedInUser) {
                 const user = JSON.parse(loggedInUser);
                 // Make a POST request to the API endpoint
-                const response = await fetch("/api/join-game", {
+                const response = await fetch("/api/join-an-open-game", {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json",
@@ -114,7 +114,7 @@ const Game = () => {
             }
           }}
         >
-          Join a Game
+          Join an open Game
         </button>
 
         <div>
