@@ -62,8 +62,6 @@ export default async function handler(
     }
 
     try {
-      const xPos = req.body.x;
-      const yPos = req.body.y;
       const playerTurn = req.body.playerTurn;
       const board = req.body.board;
       const id = req.body.id;
@@ -74,16 +72,10 @@ export default async function handler(
       const convertedBoard = convertToObjectArray(board);
       console.log("convertedBoard in place-piece is: ", convertedBoard);
 
-      let [updatedBoard, result] = gameService.updateBoard(
-        playerTurn,
-        xPos,
-        yPos,
-        convertedBoard
+      const result = gameService.checkForWinner(
+        convertedBoard,
+        playerTurn
       );
-
-      await docRef.update({
-        board: updatedBoard,
-      });
 
       // Fetch the updated document
       const updatedDoc = await docRef.get();
@@ -99,30 +91,33 @@ export default async function handler(
       };
 
       switch (result) {
-        // forced block (4 -in a row) OR valid spot
+        // win
         case 1:
-          console.log("[POST] - the piece place is valid");
+          console.log(`Player ${playerTurn} has won`);
 
-          // switch player turns
+          // set isOngoing to false
+          // create and set winner variable? prob not.. just declare winner at point of win 
+
           await docRef.update({
             playerTurn: playerTurn === 1 ? 2 : 1,
           });
 
           return res.status(200).json({
             game: gameData,
-            message: "[POST] - the piece place is valid",
-            alreadyTaken: 0,
-            isDoubleThree: 0,
+            message: `Player ${playerTurn} has won`,
+            winner: playerTurn,
+            isWon: 0,
           });
 
-        // do nothing
+        // tie - do nothing
         case 2:
-          console.log("[POST] - piece already exists. Do nothing.");
-          return res.json({
+          console.log('Tie, no winner...start a new game');
+
+          return res.status(200).json({
             game: gameData,
-            message: "POST piece already exists. Do nothing.",
-            alreadyTaken: 1,
-            isDoubleThree: 0,
+            message: 'Tie, no winner...start a new game',
+            winner: playerTurn,
+            isWon: 0,
           });
 
         // double three

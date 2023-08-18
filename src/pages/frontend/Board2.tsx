@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "@/styles/Home.module.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Cell from "../components/Cell";
 import Message from "../components/Label";
 import mushroom from "../../../public/mushroom.png";
@@ -26,7 +26,8 @@ const Board2 = () => {
   // player turn state to have label sync up with passing turn in the backend
   const [playerTurn, setPlayerTurn] = useState<number>(1);
   const [gameEnded, setGameEnded] = useState<boolean>(false);
-  const [game, setGame] = useState(null); // state for curr game in localstorage
+  // const [game, setGame] = useState(null); // state for curr game in localstorage
+  const [game, setGameWithCallback] = useStateWithCallback(null); // this new game state wrapper replaced one above
   const [user, setUser] = useState(null); // state for curr user in localstorage
 
   // useEffect to track local storage "user" / existing "game" @ startup --> set as curr user and update board
@@ -104,7 +105,7 @@ const Board2 = () => {
         // Parse the response body as JSON
         const data = await response.json();
         console.log("data in lookUpGame is: ", data);
-        setGame(data); // TASK: *** SEE BELOW useEffect *** // change the visual board after changing 'game' state
+        setGameWithCallback(data); // TASK: *** SEE BELOW useEffect *** // change the visual board after changing 'game' state
       };
 
       lookUpGame();
@@ -158,13 +159,7 @@ const Board2 = () => {
 
           // data.game is an object here
           console.log("data.game (has both msg and gameData) is: ", data.game);
-          setGame(data.game); // data.game is made using spread operator so I can just use data.game to store entire gameData
-
-          // *** HOW TO PROPERLY STRINGIFY GAME AND STORE IN LOCAL STORAGE
-          const game_string = JSON.stringify(data.game);
-          console.log("game_string is: ", game_string);
-          console.log("typeof game_string is: ", typeof game_string);
-          localStorage.setItem("game", game_string);
+          setGameWithCallback(data.game); // data.game is made using spread operator so I can just use data.game to store entire gameData
         } else {
           console.log(
             "there is no loggedInUser when searchForGames() is run...returning - doing nothing"
@@ -256,13 +251,7 @@ const Board2 = () => {
               "data.game (has both msg and gameData) is: ",
               data.game
             );
-            setGame(data.game); // retrieve entire gameData out of data since spread operator
-
-            // *** HOW TO PROPERLY STRINGIFY GAME AND STORE IN LOCAL STORAGE
-            const game_string = JSON.stringify(data.game);
-            console.log("game_string is: ", game_string);
-            console.log("typeof game_string is: ", typeof game_string);
-            localStorage.setItem("game", game_string);
+            setGameWithCallback(data.game); // retrieve entire gameData out of data since spread operator
 
             // Break search through games list to end search of games b/c found 1 to load
             break;
@@ -299,13 +288,7 @@ const Board2 = () => {
               "data.game (has both msg and gameData) is: ",
               data.game
             );
-            setGame(data.game); // data.game is made using spread operator so I can just use data.game to store entire gameData
-
-            // *** HOW TO PROPERLY STRINGIFY GAME AND STORE IN LOCAL STORAGE
-            const game_string = JSON.stringify(data.game);
-            console.log("game_string is: ", game_string);
-            console.log("typeof game_string is: ", typeof game_string);
-            localStorage.setItem("game", game_string);
+            setGameWithCallback(data.game); // data.game is made using spread operator so I can just use data.game to store entire gameData
           }
           index++; // remove references to index later on ... currently no use
         }
@@ -325,7 +308,7 @@ const Board2 = () => {
       console.log("game in useEffect when game changes is...", game);
 
       // *** STRINGIFY GAME AND STORE IN LOCAL STORAGE in this useEffect so I don't have to repeat
-      const game_string = JSON.stringify(game); 
+      const game_string = JSON.stringify(game);
       console.log("game_string is: ", game_string);
       console.log("typeof game_string is: ", typeof game_string);
       localStorage.setItem("game", game_string);
@@ -368,7 +351,22 @@ const Board2 = () => {
 
   // async check win after each turn
   const checkWinInBackend = async () => {
-    const response = await fetch("http://localhost:8000/board/checkwin");
+
+    // game is already in DB and cached -> pull up the game
+    const currentGameString = localStorage.getItem("game");
+    const currentGame = JSON.parse(currentGameString as string); // Parsing the string to JSON to use values
+
+    const response = await fetch("/api/check-win-backend", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        playerTurn: currentGame.playerTurn,
+        board: currentGame.board,
+        id: currentGame.id,
+      }),
+    });
 
     console.log("[checkWinInBackend] entered.");
 
@@ -406,6 +404,30 @@ const Board2 = () => {
     return;
   };
 
+  // setState() wrapper function ... this is how useState is actually implemented in the background
+  function useStateWithCallback<T>(
+    initialValue: T
+  ): [T, (newValue: T, callback?: (newState: T) => void) => void] {
+    const [state, setState] = useState<T>(initialValue);
+    const callbackRef = useRef<null | ((newState: T) => void)>(null);
+
+    const setWithCallback = (newValue: T, callback?: (newState: T) => void) => {
+      if (callback) {
+        callbackRef.current = callback;
+      }
+      setState(newValue);
+    };
+
+    useEffect(() => {
+      if (callbackRef.current) {
+        callbackRef.current(state);
+        callbackRef.current = null; // Clear out the callback after invoking it
+      }
+    }, [state]);
+
+    return [state, setWithCallback];
+  }
+
   // async place piece - works ... took out playerPiece:number param since it exists in backend
   const placePieceIntoBackend = async (rowIndex: number, colIndex: number) => {
     try {
@@ -416,7 +438,7 @@ const Board2 = () => {
       const currentGameString = localStorage.getItem("game");
       const currentGame = JSON.parse(currentGameString as string); // Parsing the string to JSON to use values
 
-      const response = await fetch("http://localhost:8000/piece", {
+      const response = await fetch("/api/place-piece", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -430,7 +452,6 @@ const Board2 = () => {
         }),
       });
 
-      /* DON'T NEED TO USE RESPONSE - ignore */
       const response_data = await response.json();
 
       // space is already taken
@@ -449,22 +470,28 @@ const Board2 = () => {
         response_data.isDoubleThree === 1
       ) {
         const msg = response_data.message;
-        console.log(msg); 
+        console.log(msg);
         console.log("Invalid move! - double 3. Go again.");
         return;
+
+        // valid spot
       } else if (
         response_data.alreadyTaken === 0 &&
         response_data.isDoubleThree === 0
       ) {
         const msg = response_data.message;
         console.log(msg);
-        // update board in firebase console
-        // setGame() in state var to update visual board
-        // set local storage game as well
-      }
-      // await loadBoardFromFirebaseBackend();
-      await checkWinInBackend();
 
+        const updatedBoard = response_data.game.board;
+
+        // >>> CURRENT PROBLEM <<< : The result is that the logic dependent on the new state can be unpredictable.
+        // SOLUTION: setGame() with a Callback function attached --> allows the checkWinInBackend() to run AFTER the re-render of setGame() 
+        setGameWithCallback(updatedBoard, async () => {
+          await checkWinInBackend();
+        });
+      }
+
+  
       /* // BETTER, WORKING USING .THEN AND CALLBACK FUNCTION than above
       response.json().then((result) => {
         setClientBoard(result.board);
@@ -472,7 +499,7 @@ const Board2 = () => {
       });
       */
     } catch (error) {
-      console.log("Error is: ", error);
+      console.log("[placePieceInBackend ERROR] - Error is: ", error);
     }
 
     return;
