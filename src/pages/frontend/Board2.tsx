@@ -81,7 +81,7 @@ const Board2 = () => {
       );
       console.log(
         "currentGame.board_uid is the following in user && currentGame ",
-        currentGame.game.board_uid
+        currentGame.board_uid
       );
 
       const lookUpGame = async () => {
@@ -93,7 +93,7 @@ const Board2 = () => {
           },
           body: JSON.stringify({
             user: currentUser.email, // curr client user
-            gameid: currentGame.game.board_uid, // game doc id
+            gameid: currentGame.board_uid, // game doc id
           }),
         });
 
@@ -112,10 +112,6 @@ const Board2 = () => {
     }
   }, [user]);
 
-  // *** TASK attach searchForGames() to a button later -->  when user wants to join a game ***
-  // >>DONE<<
-  // *** TASK #2 --> in for loop after I set game in localStorage, update visual board by creating a useEffect to track 'game' state var
-  // >>DONE<<
   const searchForGames = async () => {
     // Make a GET request to the API endpoint
     const response = await fetch("/api/find-all-games");
@@ -193,21 +189,21 @@ const Board2 = () => {
             continue;
           }
 
-          // testing purposes ... delete later
-          if (game.player1) {
-            console.log("game.player1 passed");
-            console.log(
-              `Game ${index} has a player in player1 field: ${game.player1}`
-              // normal, common case --> insert curr player/client into player2 field
-            );
-            // returns the proper game uid for an open game
-            console.log("the game_uid for this is ", game.board_uid);
+          // // testing purposes ... delete later
+          // if (game.player1) {
+          //   console.log("game.player1 passed");
+          //   console.log(
+          //     `Game ${index} has a player in player1 field: ${game.player1}`
+          //     // normal, common case --> insert curr player/client into player2 field
+          //   );
+          //   // returns the proper game uid for an open game
+          //   console.log("the game_uid for this is ", game.board_uid);
 
-            // retrieves the document id of game
-            console.log("the document id of this game is", game.id);
+          //   // retrieves the document id of game
+          //   console.log("the document id of this game is", game.id);
 
-            console.log("current user is", (user as any).email);
-          }
+          //   console.log("current user is", (user as any).email);
+          // }
 
           // if player1 slot is filled and player2 isnt --> assign curr to player2 field
           else if (
@@ -315,9 +311,11 @@ const Board2 = () => {
 
       // TASK: **** update client_omok_board to the value of game.board *****
 
-      console.log("game as any.board is: ", (game as any).game.board);
+      console.log('game is in useEffect() :', game); 
+
+      console.log("game as any.board is: ", (game as any).board);
       const conv_number_board = convertToObject2DArray(
-        (game as any).game.board
+        (game as any).board
       );
 
       // map over the response data and replace the numbers with the corresponding asset URLs

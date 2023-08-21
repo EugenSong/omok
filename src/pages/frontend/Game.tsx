@@ -79,7 +79,7 @@ const Game = () => {
           Fetch Games
         </button> */}
 
-        <button
+        {/* <button
           onClick={async () => {
             try {
               // to have information about the logged-in user on the server-side, you'll have to send that information as part of the request >>> `body` param
@@ -115,7 +115,7 @@ const Game = () => {
           }}
         >
           Join an open Game
-        </button>
+        </button> */}
 
         <div>
           {/* Conditionally render the user email */}
