@@ -550,9 +550,7 @@ const hasAFourInARow = (board, x, y, playerPiece) => {
 
 const gameService = {
   updateBoard,
-  copyBoard,
-  getPlayerTurn,
-  updatePlayerTurn,
+  getOpponentsTurn,
   checkForWinner,
   BOARD_LEN,
 };

@@ -43,17 +43,22 @@ app.get("/board/checkwin", (req, res) => {
 
   let response = {}; // populate a response variable and send all at once
 
-  // 1: player win ; 2: player tie ; 0: no win/tie
+  // checkForWinner() ... 1: player win ; 2: player tie ; 0: no win/tie
   if (gameService.checkForWinner(board, turn) === 1) {
-    response = { winner: turn, message: "Player has won", isWon: 0 };
+    response = { winner: turn, message: "Player has won", nextplayer: gameService.getOpponentsTurn(turn), isWon: 0 };
     console.log("[GET] - found winner.");
+
   } else if (gameService.checkForWinner(board, turn) === 2) {
-    response = { winner: 0, message: "No winner. Game is a tie!", isWon: 2 };
+    response = { winner: 0, message: "No winner. Game is a tie!", nextplayer: gameService.getOpponentsTurn(turn), isWon: 2 };
     console.log("[GET] - tie, no winner.");
+    
   } else {
     // if no win/tie, send next player's turn to frontend
     gameService.updatePlayerTurn(turn === 1 ? 2 : 1); // switch player turns
-    response = { nextplayer: gameService.getPlayerTurn(), isWon: 1 };
+
+    const nextTurn = gameService.getOpponentsTurn(turn);
+
+    response = { winner: 0, message: "no winner / no tie - continuing game.", nextplayer: nextTurn, isWon: 1 };
     console.log("[GET] - no winner / no tie - continuing game.");
   }
 

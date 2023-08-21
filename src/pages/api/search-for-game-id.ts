@@ -33,24 +33,60 @@ if (!admin.apps.length) {
 // Initialize Cloud Firestore and get a reference to the service
 const db = admin.firestore();
 
-const searchForExistingGame = async (user: string, gameid: string) => {
-  try {
-    const gamesRef = db.collection("games");
-    const snapshot = await gamesRef
-      .where("isOngoing", "==", true)
-      .where("player2", "==", user)
-      .where("board_uid", "==", gameid)
-      .get();
+// const searchForExistingGame = async (user: string, gameid: string) => {
+//   try {
+//     const gamesRef = db.collection("games");
+//     const snapshot = await gamesRef
+//       .where("isOngoing", "==", true)
+//       .where("player2", "==", user)
+//       .where("board_uid", "==", gameid)
+//       .get();
 
-    for (let doc of snapshot.docs) {
-      let game = doc.data() as Game;
-      console.log("Found game:", game);
-      return game; // Return the found game
+//     for (let doc of snapshot.docs) {
+//       let game = doc.data() as Game;
+//       console.log("Found game:", game);
+//       return game; // Return the found game
+//     }
+//   } catch (error) {
+//     console.error("There has been a problem with your fetch operation:", error);
+//   }
+// };
+
+const searchForExistingGame = async (user: string, gameid: string) => {
+    try {
+      const gamesRef = db.collection("games");
+  
+      // Query for games where player1 is the user
+      const player1Snapshot = await gamesRef
+        .where("isOngoing", "==", true)
+        .where("player1", "==", user)
+        .where("board_uid", "==", gameid)
+        .get();
+  
+      // Query for games where player2 is the user
+      const player2Snapshot = await gamesRef
+        .where("isOngoing", "==", true)
+        .where("player2", "==", user)
+        .where("board_uid", "==", gameid)
+        .get();
+  
+      // Merge the results of the two queries
+      const allDocs = [...player1Snapshot.docs, ...player2Snapshot.docs];
+  
+      // Process the merged results (assuming you only want the first matching game)
+      for (let doc of allDocs) {
+        let game = doc.data() as Game;
+        console.log("Found game:", game);
+        return game; // Return the found game
+      }
+  
+      // If no game found, return null or something similar
+      return null;
+    } catch (error) {
+      console.error("There has been a problem with your fetch operation:", error);
     }
-  } catch (error) {
-    console.error("There has been a problem with your fetch operation:", error);
-  }
-};
+  };
+  
 
 export default async function handler(
   req: NextApiRequest,

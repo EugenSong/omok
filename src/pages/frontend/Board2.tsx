@@ -81,7 +81,7 @@ const Board2 = () => {
       );
       console.log(
         "currentGame.board_uid is the following in user && currentGame ",
-        currentGame.board_uid
+        currentGame.game.board_uid
       );
 
       const lookUpGame = async () => {
@@ -93,7 +93,7 @@ const Board2 = () => {
           },
           body: JSON.stringify({
             user: currentUser.email, // curr client user
-            gameid: currentGame.board_uid, // game doc id
+            gameid: currentGame.game.board_uid, // game doc id
           }),
         });
 
@@ -145,7 +145,7 @@ const Board2 = () => {
 
           // Check if the response is ok (status code in the range 200-299)
           if (!response.ok) {
-            throw new Error("Network response was not ok");
+            throw new Error("Network response was not ok in searchForGames()");
           }
 
           // Parse the response body as JSON
@@ -314,7 +314,11 @@ const Board2 = () => {
       localStorage.setItem("game", game_string);
 
       // TASK: **** update client_omok_board to the value of game.board *****
-      const conv_number_board = convertToObject2DArray((game as any).board);
+
+      console.log("game as any.board is: ", (game as any).game.board);
+      const conv_number_board = convertToObject2DArray(
+        (game as any).game.board
+      );
 
       // map over the response data and replace the numbers with the corresponding asset URLs
       const client_board_with_assets = conv_number_board.map((row: any[]) =>
@@ -351,6 +355,7 @@ const Board2 = () => {
 
   // async check win after each turn
   const checkWinInBackend = async () => {
+    console.log("[checkWinInBackend] entered.");
 
     // game is already in DB and cached -> pull up the game
     const currentGameString = localStorage.getItem("game");
@@ -362,13 +367,16 @@ const Board2 = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        playerTurn: currentGame.playerTurn,
-        board: currentGame.board,
+        playerTurn: currentGame.game.playerTurn,
+        board: currentGame.game.board,
         id: currentGame.id,
       }),
     });
 
-    console.log("[checkWinInBackend] entered.");
+    // Check if the response is ok (status code in the range 200-299)
+    if (!response.ok) {
+      throw new Error("Network response was not ok in checkWinInBackend()");
+    }
 
     const response_data = await response.json();
     console.log(
@@ -376,12 +384,12 @@ const Board2 = () => {
       response_data
     );
 
+    const winner = response_data.winner;
+
     // winner found
     if (response_data.isWon === 0) {
-      console.log("Player ", response_data.winner, "has won.");
+      console.log("Player ", winner, "has won.");
       console.log(response_data.message);
-      //gameEnded = true;
-      const winner = response_data.winner;
       setText(`Player ${winner} has won!`);
       setGameEnded(true);
       // resetBoard();
@@ -391,14 +399,14 @@ const Board2 = () => {
     else if (response_data.isWon === 2) {
       console.log("Tie game. No winner.");
       console.log(response_data.message);
-
       setText("Tie Game!! No winner!");
+      setGameEnded(true);
       // resetBoard();
     }
 
     // no winner --> change player turn label
     else if (response_data.isWon === 1) {
-      const nextTurn = response_data.nextplayer;
+      const nextTurn = response_data.nextPlayerTurn;
       setText(`Player ${nextTurn}'s turn!`);
     }
     return;
@@ -446,8 +454,8 @@ const Board2 = () => {
         body: JSON.stringify({
           x: rowIndex,
           y: colIndex,
-          playerTurn: currentGame.playerTurn,
-          board: currentGame.board,
+          playerTurn: currentGame.game.playerTurn,
+          board: currentGame.game.board,
           id: currentGame.id,
         }),
       });
@@ -485,13 +493,12 @@ const Board2 = () => {
         const updatedBoard = response_data.game.board;
 
         // >>> CURRENT PROBLEM <<< : The result is that the logic dependent on the new state can be unpredictable.
-        // SOLUTION: setGame() with a Callback function attached --> allows the checkWinInBackend() to run AFTER the re-render of setGame() 
+        // SOLUTION: setGame() with a Callback function attached --> allows the checkWinInBackend() to run AFTER the re-render of setGame()
         setGameWithCallback(updatedBoard, async () => {
           await checkWinInBackend();
         });
       }
 
-  
       /* // BETTER, WORKING USING .THEN AND CALLBACK FUNCTION than above
       response.json().then((result) => {
         setClientBoard(result.board);
@@ -512,11 +519,41 @@ const Board2 = () => {
 
   // handle each player's piece in Grid
   const handleClick = async (rowIndex: number, colIndex: number) => {
-    if (gameEnded === false) await placePieceIntoBackend(rowIndex, colIndex);
+    // game is already in DB and cached -> pull up the game
+    const currentGameString = localStorage.getItem("game");
+    const currentGame = JSON.parse(currentGameString as string); // Parsing the string to JSON to use values
 
+    // how to parse json values
+    console.log("currentGame is this in handleClick: ", currentGame);
+
+    console.log("currentGame.game.isOngoing is: ", currentGame.game.isOngoing);
+
+    console.log(
+      "currentGame.game.player1 in handle click is: ",
+      currentGame.game.player1
+    );
+
+    console.log(
+      "currentGame.game.player2 in handle click is: ",
+      currentGame.game.player2
+    );
+
+    if (
+      currentGame.game.isOngoing &&
+      currentGame.game.player1 &&
+      currentGame.game.player2
+    )
+      await placePieceIntoBackend(rowIndex, colIndex);
     // moved loadBoard() and checkWin() inside of placePiece() to return from original call when spot is already taken
     //  await loadBoardFromBackend();
     //  await checkWinInBackend();
+    // loadBoard --> now handled using setGame
+    // checkWin() --> callback part of setGame
+    else {
+      console.log(
+        "Error processing handleClick - no currentGame.game.isOngoing && currentGame.game.player1 && currentGame.game.player2"
+      );
+    }
 
     return;
   };
@@ -556,7 +593,7 @@ const Board2 = () => {
               className={styles.resetbutton}
               onClick={() => searchForGames()}
             >
-              Set A Game Into Local Storage
+              Search For A Game
             </button>
           </div>
           <table className={styles.grid}>

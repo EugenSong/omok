@@ -18,8 +18,9 @@ const db = admin.firestore();
 type Data = {
   message?: string;
   game?: GameData; // Add this line
-  alreadyTaken?: number;
-  isDoubleThree?: number;
+  nextPlayerTurn?: number;
+  winner?: number;
+  isWon?: number;
   error?: {
     message: string;
     code?: number;
@@ -41,8 +42,6 @@ const validate = (req: NextApiRequest): boolean => {
   // For now, as an example, I'm checking if x and y exist in the body.
   return (
     req.body &&
-    typeof req.body.x === "number" &&
-    typeof req.body.y === "number" &&
     typeof req.body.playerTurn === "number" &&
     typeof req.body.id === "string"
   );
@@ -72,10 +71,7 @@ export default async function handler(
       const convertedBoard = convertToObjectArray(board);
       console.log("convertedBoard in place-piece is: ", convertedBoard);
 
-      const result = gameService.checkForWinner(
-        convertedBoard,
-        playerTurn
-      );
+      const result = gameService.checkForWinner(convertedBoard, playerTurn);
 
       // Fetch the updated document
       const updatedDoc = await docRef.get();
@@ -90,16 +86,19 @@ export default async function handler(
         ...(updatedDoc.data() as any),
       };
 
+      const nextPlayerTurn = gameService.getOpponentsTurn(playerTurn);
+
       switch (result) {
-        // win
+        // win checkForWinner() returns 1 ... win
         case 1:
           console.log(`Player ${playerTurn} has won`);
 
           // set isOngoing to false
-          // create and set winner variable? prob not.. just declare winner at point of win 
+          // create and set winner variable? prob not.. just declare winner at point of win
 
           await docRef.update({
-            playerTurn: playerTurn === 1 ? 2 : 1,
+            playerTurn: nextPlayerTurn,
+            isOngoing: false,
           });
 
           return res.status(200).json({
@@ -107,34 +106,46 @@ export default async function handler(
             message: `Player ${playerTurn} has won`,
             winner: playerTurn,
             isWon: 0,
+            nextPlayerTurn: 0,
           });
 
-        // tie - do nothing
+        // checForWinner() returns 2... tie
         case 2:
-          console.log('Tie, no winner...start a new game');
+          console.log("No winner. Game is a tie!");
 
-          return res.status(200).json({
-            game: gameData,
-            message: 'Tie, no winner...start a new game',
-            winner: playerTurn,
-            isWon: 0,
+          await docRef.update({
+            playerTurn: nextPlayerTurn,
+            isOngoing: false,
           });
-
-        // double three
-        case 3:
-          console.log("[POST] - double three. Go again.");
           return res.json({
             game: gameData,
-            message: "Invalid move - double 3. Go again.",
-            alreadyTaken: 0,
-            isDoubleThree: 1,
+            message: "No winner. Game is a tie!",
+            winner: 0,
+            isWon: 2,
+            nextPlayerTurn: 0,
+          });
+
+        // checkForWinner() returns 0... continue playing .. no tie/win
+        case 0:
+          console.log("No winner / no tie - Continue playing");
+
+          await docRef.update({
+            playerTurn: nextPlayerTurn,
+          });
+
+          return res.json({
+            game: gameData,
+            message: "No winner / no tie - Continue playing.",
+            winner: 0,
+            isWon: 1,
+            nextPlayerTurn: nextPlayerTurn,
           });
 
         default:
-          console.log("Failure updating board - Invalid move!");
+          console.log("Failure checkingForWinner() ");
           return res.status(400).json({
             game: gameData,
-            message: "error in updateBoard() of POST",
+            message: "error in checkWinInBackend() of POST",
           });
       }
     } catch (error) {

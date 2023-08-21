@@ -55,7 +55,7 @@ const Game = () => {
           logout
         </button>
 
-        <button
+        {/* <button
           onClick={async () => {
             try {
               // Make a GET request to the API endpoint
@@ -77,7 +77,7 @@ const Game = () => {
           }}
         >
           Fetch Games
-        </button>
+        </button> */}
 
         <button
           onClick={async () => {
