@@ -69,7 +69,7 @@ export default async function handler(
 
       // turn firebase board into 2-d board
       const convertedBoard = convertToObjectArray(board);
-      console.log("convertedBoard in place-piece is: ", convertedBoard);
+    //   console.log("convertedBoard in place-piece is: ", convertedBoard);
 
       const result = gameService.checkForWinner(convertedBoard, playerTurn);
 

@@ -1,8 +1,5 @@
 const BOARD_LEN = 19;
 
-let playerTurn = 1;
-let startPlayer = 1;
-
 const getPlayerTurn = () => {
   return playerTurn;
 };

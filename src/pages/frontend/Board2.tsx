@@ -72,7 +72,7 @@ const Board2 = () => {
         currentUser
       );
       console.log(
-        "currentUser[email] is the following in user && currentGame ",
+        "currentUser.email is the following in user && currentGame ",
         currentUser.email
       );
       console.log(
@@ -104,8 +104,8 @@ const Board2 = () => {
 
         // Parse the response body as JSON
         const data = await response.json();
-        console.log("data in lookUpGame is: ", data);
-        setGameWithCallback(data); // TASK: *** SEE BELOW useEffect *** // change the visual board after changing 'game' state
+        console.log("data in lookUpGame is: ", data.game);
+        setGameWithCallback(data.game); 
       };
 
       lookUpGame();
@@ -311,12 +311,10 @@ const Board2 = () => {
 
       // TASK: **** update client_omok_board to the value of game.board *****
 
-      console.log('game is in useEffect() :', game); 
+      console.log("game is in useEffect() :", game);
 
       console.log("game as any.board is: ", (game as any).board);
-      const conv_number_board = convertToObject2DArray(
-        (game as any).board
-      );
+      const conv_number_board = convertToObject2DArray((game as any).board);
 
       // map over the response data and replace the numbers with the corresponding asset URLs
       const client_board_with_assets = conv_number_board.map((row: any[]) =>
@@ -359,14 +357,16 @@ const Board2 = () => {
     const currentGameString = localStorage.getItem("game");
     const currentGame = JSON.parse(currentGameString as string); // Parsing the string to JSON to use values
 
-    const response = await fetch("/api/check-win-backend", {
+    console.log('currentGame in checkWin is: ', currentGame); 
+
+    const response = await fetch("/api/check-win-in-backend", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        playerTurn: currentGame.game.playerTurn,
-        board: currentGame.game.board,
+        playerTurn: currentGame.playerTurn,
+        board: currentGame.board,
         id: currentGame.id,
       }),
     });
@@ -444,6 +444,8 @@ const Board2 = () => {
       const currentGameString = localStorage.getItem("game");
       const currentGame = JSON.parse(currentGameString as string); // Parsing the string to JSON to use values
 
+      console.log("currentGame in placePieceIntoBackend is: ", currentGame);
+
       const response = await fetch("/api/place-piece", {
         method: "POST",
         headers: {
@@ -452,8 +454,8 @@ const Board2 = () => {
         body: JSON.stringify({
           x: rowIndex,
           y: colIndex,
-          playerTurn: currentGame.game.playerTurn,
-          board: currentGame.game.board,
+          playerTurn: currentGame.playerTurn,
+          board: currentGame.board,
           id: currentGame.id,
         }),
       });
@@ -488,11 +490,14 @@ const Board2 = () => {
         const msg = response_data.message;
         console.log(msg);
 
-        const updatedBoard = response_data.game.board;
+        const updatedBoard = response_data.game;
+
+        console.log("updatedBoard (response_data.game) in placePieceIntoBackend is :", updatedBoard);
 
         // >>> CURRENT PROBLEM <<< : The result is that the logic dependent on the new state can be unpredictable.
         // SOLUTION: setGame() with a Callback function attached --> allows the checkWinInBackend() to run AFTER the re-render of setGame()
         setGameWithCallback(updatedBoard, async () => {
+          console.log('setGameWithCallback called in placePiece()with updatedBoard: ', updatedBoard); 
           await checkWinInBackend();
         });
       }
@@ -524,23 +529,19 @@ const Board2 = () => {
     // how to parse json values
     console.log("currentGame is this in handleClick: ", currentGame);
 
-    console.log("currentGame.game.isOngoing is: ", currentGame.game.isOngoing);
+    console.log("currentGame.game.isOngoing is: ", currentGame.isOngoing);
 
     console.log(
       "currentGame.game.player1 in handle click is: ",
-      currentGame.game.player1
+      currentGame.player1
     );
 
     console.log(
       "currentGame.game.player2 in handle click is: ",
-      currentGame.game.player2
+      currentGame.player2
     );
 
-    if (
-      currentGame.game.isOngoing &&
-      currentGame.game.player1 &&
-      currentGame.game.player2
-    )
+    if (currentGame.isOngoing && currentGame.player1 && currentGame.player2)
       await placePieceIntoBackend(rowIndex, colIndex);
     // moved loadBoard() and checkWin() inside of placePiece() to return from original call when spot is already taken
     //  await loadBoardFromBackend();
