@@ -7,8 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "watch:server": "nodemon 'src/pages/backend/controller.js'"
+    "lint": "next lint"
   },
   "dependencies": {
     "@types/react": "18.0.33",
