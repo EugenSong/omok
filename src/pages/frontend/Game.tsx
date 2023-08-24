@@ -58,12 +58,7 @@ const Game = () => {
         </button>
 
       
-        <div>
-          {/* Conditionally render the user email */}
-          {user && (user as any).email ? (
-            <div>{(user as any).email} is logged in</div>
-          ) : null}
-        </div>
+       
 
   
         <div>

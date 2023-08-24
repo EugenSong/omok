@@ -64,12 +64,33 @@ const Board2 = () => {
         "There IS a User but NO currentGame...waiting for User to perform an action."
       );
 
-      
+      const lookForExistingGame = async () => {
+        // look for existing game in db
+        const response = await fetch("/api/look-for-existing-game", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user: currentUser.email, // curr client user
+          }),
+        });
 
-      
-      console.log(
-        "There IS a User but NO currentGame...waiting for User to perform an action."
-      );
+        // Check if the response is ok (status code in the range 200-299)
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+
+        // Parse the response body as JSON
+        const data = await response.json();
+        console.log(
+          "data.game in search for any existing games is: ",
+          data.game
+        );
+        setGameWithCallback(data.game);
+      };
+
+      lookForExistingGame();
       return;
 
       // case 2 - user and locally stored game (user is logged on and is playing a game)
@@ -509,6 +530,8 @@ const Board2 = () => {
         const msg = response_data.message;
         console.log(msg);
         console.log("Invalid move! - double 3. Go again.");
+
+        setText("Invalid move! - double 3. Go again.");
         return;
 
         // valid spot

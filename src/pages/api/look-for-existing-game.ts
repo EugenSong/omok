@@ -8,7 +8,19 @@ type Data = {
     message: string;
     code?: number;
   };
+  game?: GameData; // Include a field for the game object
 };
+
+interface GameData {
+  id?: string;
+  board?: Map<number, number[]>;
+  board_uid?: string;
+  isOngoing?: boolean;
+  player1?: string;
+  player2?: string;
+  playerTurn?: 1;
+  // ...any other fields from the document...
+}
 
 // Initialize Firebase
 if (!admin.apps.length) {
@@ -22,51 +34,36 @@ if (!admin.apps.length) {
 // Initialize Cloud Firestore and get a reference to the service
 const db = admin.firestore();
 
-
-// const searchForExistingGame = async (currentUserEmail: any) => {
-//   try {
-//     const gamesRef = db.collection("games");
-//     const snapshot = await gamesRef.get();
-//     // console.log("Firestore snapshot:", snapshot); // Log the Firestore snapshot
-
-//     for (let doc of snapshot.docs) {
-//       console.log("doc is ", doc); // doc is of type QueryDocumentSnapshot  ---> need to conv to JS object to manipulate
-
-//       // returns a DocumentData object, which is essentially a JavaScript object that represents your document's data ----> no need to JSON.parse(game)
-//       let game = doc.data();
-//       console.log("doc.data() is ", game);
-
-//       // use dot notation b/c game is now JS obj
-//       console.log("game.user.email is ", game.player1);
-
-//       if (game.isOngoing && game.player1 === currentUserEmail) {
-//         console.log("returning from searchForOpenGame");
-//         return game; // Return the found game
-//       }
-//     }
-//   } catch (error) {
-//     console.error("There has been a problem with your fetch operation:", error);
-//   }
-// };
-
 const searchForExistingGame = async (currentUserEmail: any) => {
   try {
     const gamesRef = db.collection("games");
-    const snapshot = await gamesRef
+
+    // Query for games where player1 is the user
+    const player1Snapshot = await gamesRef
       .where("isOngoing", "==", true)
       .where("player1", "==", currentUserEmail)
       .get();
 
-    for (let doc of snapshot.docs) {
-      let game = doc.data();
-      console.log("Found game:", game);
-      return game; // Return the found game
+    // Query for games where player2 is the user
+    const player2Snapshot = await gamesRef
+      .where("isOngoing", "==", true)
+      .where("player2", "==", currentUserEmail)
+      .get();
+
+    // Merge the results of the two queries
+    const allDocs = [...player1Snapshot.docs, ...player2Snapshot.docs];
+
+    // Process the merged results (assuming you only want the first matching game)
+    for (let doc of allDocs) {
+      return { ...doc.data(), id: doc.id }; // Return the found game and its id
     }
+
+    // If no game found, return null or something similar
+    return null;
   } catch (error) {
     console.error("There has been a problem with your fetch operation:", error);
   }
 };
-
 
 export default async function handler(
   req: NextApiRequest,
@@ -77,18 +74,19 @@ export default async function handler(
       // first search for existing game with notOngoing (FIX LATER for OPP COND) or for already existing email in game
 
       // turn json string into an js object using JSON.parse to access fields
-      let userData = JSON.parse(req.body.user);
+      let body = req.body;
 
-      console.log("req.body [user] is", userData);
-      console.log("currentUserEmail in the handler is ", userData.email);
-      const game = await searchForExistingGame(userData.email);
+      let email = body.user;
+
+      console.log("req.body [user] is", body);
+      console.log("currentUserEmail in the handler is ", email);
+      const game = await searchForExistingGame(email);
       if (game) {
         console.log("Game found: ", game);
-        res
-          .status(200)
-          .json({
-            message: "An Open Game exists. Joining the open game...",
-          });
+        res.status(200).json({
+          message: "An Existing Game exists. Joining the game...",
+          game: game,
+        });
       } else {
         console.log("No game found");
       }
