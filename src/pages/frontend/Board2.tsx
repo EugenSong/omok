@@ -62,35 +62,35 @@ const Board2 = () => {
         "There IS a User but NO currentGame...waiting for User to perform an action."
       );
 
-      const lookForExistingGame = async () => {
-        // look for existing game in db
-        const response = await fetch("/api/look-for-existing-game", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            user: currentUser.email, // curr client user
-          }),
-        });
+      // const lookForExistingGame = async () => {
+      //   // look for existing game in db
+      //   const response = await fetch("/api/look-for-existing-game", {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //     body: JSON.stringify({
+      //       user: currentUser.email, // curr client user
+      //     }),
+      //   });
 
-        // Check if the response is ok (status code in the range 200-299)
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
+      //   // Check if the response is ok (status code in the range 200-299)
+      //   if (!response.ok) {
+      //     throw new Error("Network response was not ok");
+      //   }
 
-        // Parse the response body as JSON
-        const data = await response.json();
-        console.log(
-          "data.game in search for any existing games is: ",
-          data.game
-        );
+      //   // Parse the response body as JSON
+      //   const data = await response.json();
+      //   console.log(
+      //     "data.game in search for any existing games is: ",
+      //     data.game
+      //   );
 
-        if (data)
-        setGameWithCallback(data.game);
-      };
+      //   if (data)
+      //   setGameWithCallback(data.game);
+      // };
 
-      lookForExistingGame();
+      // lookForExistingGame();
       return;
 
       // case 2 - user and locally stored game (user is logged on and is playing a game)
