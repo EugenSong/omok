@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import admin from "firebase-admin";
-import serviceAccount from "../backend/key.json" assert { type: "json" };
-import gameService from "../backend/game-service";
+import serviceAccount from "../../backend/key.json" assert { type: "json" };
+import gameService from "../../backend/game-service";
 
 // Initialize Firebase
 if (!admin.apps.length) {
@@ -69,7 +69,7 @@ export default async function handler(
 
       // turn firebase board into 2-d board
       const convertedBoard = convertToObjectArray(board);
-    //   console.log("convertedBoard in place-piece is: ", convertedBoard);
+      //   console.log("convertedBoard in place-piece is: ", convertedBoard);
 
       const result = gameService.checkForWinner(convertedBoard, playerTurn);
 
@@ -126,9 +126,9 @@ export default async function handler(
         case 0:
           console.log("No winner / no tie - Continue playing");
 
-        //   await docRef.update({
-        //     playerTurn: nextPlayerTurn,
-        //   });
+          //   await docRef.update({
+          //     playerTurn: nextPlayerTurn,
+          //   });
 
           return res.json({
             game: gameData,

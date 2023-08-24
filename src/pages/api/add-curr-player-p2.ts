@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import admin from "firebase-admin";
-import serviceAccount from "../backend/key.json" assert { type: "json" };
+import serviceAccount from "../../backend/key.json" assert { type: "json" };
 
 type ApiResponse = {
   message?: string;

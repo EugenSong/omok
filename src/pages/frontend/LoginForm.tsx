@@ -6,7 +6,7 @@ import {
 import { useState } from "react";
 import { useRouter } from "next/router";
 import styles from "@/styles/Home.module.css";
-import firebaseAuth from "../backend/firebase-auth";
+import firebaseAuth from "../../backend/firebase-auth";
 
 // Called a  Functional component
 const LoginForm = () => {
@@ -25,7 +25,7 @@ const LoginForm = () => {
 
   // one method to nav pages - has to be in functional component ; not embedded
   const router = useRouter();
-  
+
   const navigateToGame = () => {
     router.push("/frontend/Game");
     return;

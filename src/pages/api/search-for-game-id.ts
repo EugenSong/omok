@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import admin from "firebase-admin";
-import serviceAccount from "../backend/key.json" assert { type: "json" };
+import serviceAccount from "../../backend/key.json" assert { type: "json" };
 
 type Data = {
   message?: string;
@@ -80,8 +80,8 @@ export default async function handler(
       let user = body.user;
       let gameuid = body.gameid;
 
-    //   console.log("req.body [user] is", user);
-    //   console.log("currentUserEmail in the handler is ", user);
+      //   console.log("req.body [user] is", user);
+      //   console.log("currentUserEmail in the handler is ", user);
       const game = await searchForExistingGame(user, gameuid);
       if (game) {
         console.log("Game found: ", game);
