@@ -1,6 +1,6 @@
 import { getAuth } from 'firebase/auth'
 import { initializeApp } from 'firebase/app';
-import firebaseConfig from './firebase-config.js';
+import firebaseConfig from './firebase-config.mjs/index.js';
 
 
 // retrieve initialized firebase app 

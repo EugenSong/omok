@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import admin from "firebase-admin";
 import serviceAccount from "../../backend/key.json" assert { type: "json" };
-import gameService from "../../backend/game-service";
+import gameService from "../../backend/game-service.mjs";
 
 // Initialize Firebase
 if (!admin.apps.length) {

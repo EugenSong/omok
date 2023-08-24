@@ -6,7 +6,7 @@ import {
 import { useState } from "react";
 import { useRouter } from "next/router";
 import styles from "@/styles/Home.module.css";
-import firebaseAuth from "../../backend/firebase-auth";
+import firebaseAuth from "../../backend/firebase-auth.mjs";
 
 // Called a  Functional component
 const LoginForm = () => {
