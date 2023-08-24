@@ -30,8 +30,6 @@ const Board2 = () => {
   const [game, setGameWithCallback] = useStateWithCallback(null); // this new game state wrapper replaced one above
   const [user, setUser] = useState(null); // state for curr user in localstorage
 
-  const [player1id, setp1ID] = useState("");
-  const [player2id, setp2ID] = useState("");
 
   // useEffect to track local storage "user" / existing "game" @ startup --> set as curr user and update board
   useEffect(() => {
@@ -87,6 +85,8 @@ const Board2 = () => {
           "data.game in search for any existing games is: ",
           data.game
         );
+
+        if (data)
         setGameWithCallback(data.game);
       };
 
