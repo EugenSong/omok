@@ -93,9 +93,6 @@ export default async function handler(
         case 1:
           console.log(`Player ${playerTurn} has won`);
 
-          // set isOngoing to false
-          // create and set winner variable? prob not.. just declare winner at point of win
-
           await docRef.update({
             playerTurn: nextPlayerTurn,
             isOngoing: false,
@@ -129,9 +126,9 @@ export default async function handler(
         case 0:
           console.log("No winner / no tie - Continue playing");
 
-          await docRef.update({
-            playerTurn: nextPlayerTurn,
-          });
+        //   await docRef.update({
+        //     playerTurn: nextPlayerTurn,
+        //   });
 
           return res.json({
             game: gameData,

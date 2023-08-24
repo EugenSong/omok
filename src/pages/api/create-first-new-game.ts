@@ -96,8 +96,8 @@ export default async function handler(
     try {
       // turn json string into an js object using JSON.parse to access fields
       let userData = JSON.parse(req.body.user);
-      console.log("req.body [user] is", userData);
-      console.log("currentUserEmail in the handler is ", userData.email);
+    //   console.log("req.body [user] is", userData);
+    //   console.log("currentUserEmail in the handler is ", userData.email);
 
       // Extract the user from the request body
       const { user } = req.body;

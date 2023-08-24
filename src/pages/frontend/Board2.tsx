@@ -24,18 +24,21 @@ const Board2 = () => {
 
   const [text, setText] = useState("Player 1's Turn!"); // label state
   // player turn state to have label sync up with passing turn in the backend
-  const [playerTurn, setPlayerTurn] = useState<number>(1);
+  const [playerTurn, setPlayerTurnWithCallback] = useStateWithCallback(1);
   const [gameEnded, setGameEnded] = useState<boolean>(false);
   // const [game, setGame] = useState(null); // state for curr game in localstorage
   const [game, setGameWithCallback] = useStateWithCallback(null); // this new game state wrapper replaced one above
   const [user, setUser] = useState(null); // state for curr user in localstorage
+
+  const [player1id, setp1ID] = useState("");
+  const [player2id, setp2ID] = useState("");
 
   // useEffect to track local storage "user" / existing "game" @ startup --> set as curr user and update board
   useEffect(() => {
     const loggedInUser = localStorage.getItem("user");
     if (loggedInUser) {
       const foundUser = JSON.parse(loggedInUser); // JSON.parse() turns JSON object into Javascript object
-      console.log("loggedInUser found - setting user as foundUser ", foundUser);
+      // console.log("loggedInUser found - setting user as foundUser ", foundUser);
       setUser(foundUser);
     }
   }, []);
@@ -56,32 +59,42 @@ const Board2 = () => {
 
     // case 1 - user but no local stored game (user is logged on but no existing game)
     if (currentUser && !currentGame) {
+
+      console.log(
+        "There IS a User but NO currentGame...waiting for User to perform an action."
+      );
+
+      
+
+      
       console.log(
         "There IS a User but NO currentGame...waiting for User to perform an action."
       );
       return;
-      // searchForGames() will go belong in a button for user to search for game or to initialize a new game and join it as p1
-      // make join game button pop up ? or stay appeared
 
       // case 2 - user and locally stored game (user is logged on and is playing a game)
     } else if (currentUser && currentGame) {
       // track local storage "game" @ startup --> set as existing game and populate board with curr game
 
       console.log(
-        "currentUser is the following in user && currentGame ",
+        "currentUser is the following when user && currentGame ",
         currentUser
       );
       console.log(
-        "currentUser.email is the following in user && currentGame ",
+        "currentUser.email is the following when user && currentGame ",
         currentUser.email
       );
       console.log(
-        "currentGame is the following in user && currentGame ",
+        "currentGame is the following when user && currentGame ",
         currentGame
       );
       console.log(
-        "currentGame.board_uid is the following in user && currentGame ",
+        "currentGame.board_uid is the following when user && currentGame ",
         currentGame.board_uid
+      );
+
+      console.log(
+        "lookUpGame() called in [user] useEffect...only when user && currenetGame"
       );
 
       const lookUpGame = async () => {
@@ -105,7 +118,7 @@ const Board2 = () => {
         // Parse the response body as JSON
         const data = await response.json();
         console.log("data in lookUpGame is: ", data.game);
-        setGameWithCallback(data.game); 
+        setGameWithCallback(data.game);
       };
 
       lookUpGame();
@@ -156,6 +169,8 @@ const Board2 = () => {
           // data.game is an object here
           console.log("data.game (has both msg and gameData) is: ", data.game);
           setGameWithCallback(data.game); // data.game is made using spread operator so I can just use data.game to store entire gameData
+
+          setText("Waiting for player 2 to join...");
         } else {
           console.log(
             "there is no loggedInUser when searchForGames() is run...returning - doing nothing"
@@ -171,7 +186,7 @@ const Board2 = () => {
     } else {
       // there exists games in games db
       try {
-        console.log("lookForOpenGame running");
+        console.log("there exists games in games db in searchForGames()");
         console.log("data is ", data); // object that holds array of games
         console.log("data.data is ", data.data); // actual array of games
 
@@ -179,7 +194,7 @@ const Board2 = () => {
         let index = 0;
         for (let game of data.data) {
           console.log("game.isOngoing is ", game.isOngoing);
-          console.log("!game.isOngoing is ", !game.isOngoing);
+
           // if game is not ongoing OR there are already 2 players, skip game
           if (!game.isOngoing || (game.player1 && game.player2)) {
             index++;
@@ -250,43 +265,36 @@ const Board2 = () => {
             setGameWithCallback(data.game); // retrieve entire gameData out of data since spread operator
 
             // Break search through games list to end search of games b/c found 1 to load
-            break;
-          } else {
-            // create a new game and join player1 field ***** + update 'game' state to fresh game b/c all existing games are invalid
-            console.log(
-              "There are no open games...creating a new one and waiting for player to join..."
-            );
-
-            const response = await fetch("/api/create-first-new-game", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ user: loggedInUser }),
-            });
-
-            // Check if the response is ok (status code in the range 200-299)
-            if (!response.ok) {
-              throw new Error("Network response was not ok");
-            }
-
-            // Parse the response body as JSON
-            const data = await response.json();
-
-            // Do something with the data
-            console.log(
-              "data in searchForGames() when 0 len and loggedInUser is ",
-              data
-            );
-
-            // data.game is an object here
-            console.log(
-              "data.game (has both msg and gameData) is: ",
-              data.game
-            );
-            setGameWithCallback(data.game); // data.game is made using spread operator so I can just use data.game to store entire gameData
+            return;
           }
+
           index++; // remove references to index later on ... currently no use
+        }
+
+        if (index >= data.data.length) {
+          console.log(
+            "reached the end of the games list... creating a new one"
+          );
+
+          const response = await fetch("/api/create-first-new-game", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ user: loggedInUser }),
+          });
+
+          // Check if the response is ok (status code in the range 200-299)
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+
+          // Parse the response body as JSON
+          const data = await response.json();
+
+          setGameWithCallback(data.game); // data.game is made using spread operator so I can just use data.game to store entire gameData
+
+          setText("Waiting for player 2 to join...");
         }
       } catch (error) {
         console.error(
@@ -308,8 +316,6 @@ const Board2 = () => {
       console.log("game_string is: ", game_string);
       console.log("typeof game_string is: ", typeof game_string);
       localStorage.setItem("game", game_string);
-
-      // TASK: **** update client_omok_board to the value of game.board *****
 
       console.log("game is in useEffect() :", game);
 
@@ -336,6 +342,14 @@ const Board2 = () => {
 
       // fill state board using fetched, converted data
       setClientBoard(client_board_with_strings);
+
+      // Define an async function inside the useEffect
+      const fetchCheckWin = async () => {
+        await checkWinInBackend();
+      };
+
+      // Call the async function
+      fetchCheckWin();
     }
   }, [game]);
 
@@ -357,7 +371,9 @@ const Board2 = () => {
     const currentGameString = localStorage.getItem("game");
     const currentGame = JSON.parse(currentGameString as string); // Parsing the string to JSON to use values
 
-    console.log('currentGame in checkWin is: ', currentGame); 
+    console.log("currentGame in checkWin is: ", currentGame);
+
+    const currentPlayerTurn = currentGame.playerTurn === 1 ? 2 : 1;
 
     const response = await fetch("/api/check-win-in-backend", {
       method: "POST",
@@ -365,7 +381,7 @@ const Board2 = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        playerTurn: currentGame.playerTurn,
+        playerTurn: currentPlayerTurn,
         board: currentGame.board,
         id: currentGame.id,
       }),
@@ -389,6 +405,7 @@ const Board2 = () => {
       console.log("Player ", winner, "has won.");
       console.log(response_data.message);
       setText(`Player ${winner} has won!`);
+      localStorage.removeItem("game"); // rm individual key
       setGameEnded(true);
       // resetBoard();
     }
@@ -398,14 +415,26 @@ const Board2 = () => {
       console.log("Tie game. No winner.");
       console.log(response_data.message);
       setText("Tie Game!! No winner!");
+      localStorage.removeItem("game");
       setGameEnded(true);
       // resetBoard();
     }
 
     // no winner --> change player turn label
     else if (response_data.isWon === 1) {
-      const nextTurn = response_data.nextPlayerTurn;
-      setText(`Player ${nextTurn}'s turn!`);
+      console.log("[checkWinInBackend] - no winner/no tie... keep playing");
+
+      /*
+
+           setGameWithCallback(response_data.game, async () => {
+        localStorage.setItem("game", response_data.game);
+        const nextTurn = response_data.nextPlayerTurn;
+        setText(`Player ${nextTurn}'s turn!`);
+        await checkWinInBackend();
+        return;
+      });
+
+      */
     }
     return;
   };
@@ -492,13 +521,24 @@ const Board2 = () => {
 
         const updatedBoard = response_data.game;
 
-        console.log("updatedBoard (response_data.game) in placePieceIntoBackend is :", updatedBoard);
+        console.log(
+          "updatedBoard (response_data.game) in placePieceIntoBackend is :",
+          updatedBoard
+        );
+
+        const otherTurn = currentGame.playerTurn === 1 ? 2 : 1;
+
+        setPlayerTurnWithCallback(otherTurn, (updatedPlayerTurn) => {
+          setText(`Player ${updatedPlayerTurn}'s turn!`);
+        });
 
         // >>> CURRENT PROBLEM <<< : The result is that the logic dependent on the new state can be unpredictable.
         // SOLUTION: setGame() with a Callback function attached --> allows the checkWinInBackend() to run AFTER the re-render of setGame()
-        setGameWithCallback(updatedBoard, async () => {
-          console.log('setGameWithCallback called in placePiece()with updatedBoard: ', updatedBoard); 
-          await checkWinInBackend();
+        setGameWithCallback(updatedBoard, () => {
+          console.log(
+            "setGameWithCallback called in placePiece()with updatedBoard: ",
+            updatedBoard
+          );
         });
       }
 
@@ -524,31 +564,48 @@ const Board2 = () => {
   const handleClick = async (rowIndex: number, colIndex: number) => {
     // game is already in DB and cached -> pull up the game
     const currentGameString = localStorage.getItem("game");
+
+    const currentGamePlayer = localStorage.getItem("user");
+
+    if (!currentGameString) return;
+
+    if (!currentGamePlayer) return;
+
     const currentGame = JSON.parse(currentGameString as string); // Parsing the string to JSON to use values
+
+    const currentPlayer = JSON.parse(currentGamePlayer as string);
+
+    // get playerTurn from remote game
+    const currentTurn = currentGame.playerTurn;
 
     // how to parse json values
     console.log("currentGame is this in handleClick: ", currentGame);
 
-    console.log("currentGame.game.isOngoing is: ", currentGame.isOngoing);
+    console.log("currentGame.isOngoing is: ", currentGame.isOngoing);
 
     console.log(
-      "currentGame.game.player1 in handle click is: ",
+      "currentGame.player1 in handle click is: ",
       currentGame.player1
     );
 
     console.log(
-      "currentGame.game.player2 in handle click is: ",
+      "currentGame.player2 in handle click is: ",
       currentGame.player2
     );
 
-    if (currentGame.isOngoing && currentGame.player1 && currentGame.player2)
-      await placePieceIntoBackend(rowIndex, colIndex);
-    // moved loadBoard() and checkWin() inside of placePiece() to return from original call when spot is already taken
-    //  await loadBoardFromBackend();
-    //  await checkWinInBackend();
-    // loadBoard --> now handled using setGame
-    // checkWin() --> callback part of setGame
-    else {
+    if (currentGame.isOngoing && currentGame.player1 && currentGame.player2) {
+      // compare player1 and player2 against playerTurn
+      // compare currentPlayer to player1-value vs player2-value
+      // have whoever matches make the move
+      if (currentTurn === 1 && currentPlayer.email === currentGame.player1) {
+        await placePieceIntoBackend(rowIndex, colIndex);
+      } else if (
+        currentTurn === 2 &&
+        currentPlayer.email === currentGame.player2
+      ) {
+        await placePieceIntoBackend(rowIndex, colIndex);
+      }
+    } else {
       console.log(
         "Error processing handleClick - no currentGame.game.isOngoing && currentGame.game.player1 && currentGame.game.player2"
       );
@@ -574,7 +631,11 @@ const Board2 = () => {
     <div>
       <div className={styles.container}>
         <div className={styles.player1label}>
-          <div className={styles.leftlabel}>Player 1</div>
+          <div className={styles.leftlabel}>
+            {game && (game as any).player1
+              ? `Player 1 - ${(game as any).player1}`
+              : "Player 1"}
+          </div>
           <div>
             <Image src={mushroom} alt="Mushroom Image" />
           </div>
@@ -585,9 +646,6 @@ const Board2 = () => {
             <Message message={text} />
           </div>
           <div>
-            {/* <button className={styles.resetbutton} onClick={() => resetBoard()}>
-              Reset
-            </button> */}
             <button
               className={styles.resetbutton}
               onClick={() => searchForGames()}
@@ -615,7 +673,11 @@ const Board2 = () => {
         </div>
 
         <div className={styles.player2label}>
-          <div className={styles.rightlabel}>Player 2</div>
+          <div className={styles.rightlabel}>
+            {game && (game as any).player2
+              ? `Player 2 - ${(game as any).player2}`
+              : "Player 2"}
+          </div>
           <div>
             <Image src={slime} alt="Slime Image" />
           </div>

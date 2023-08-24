@@ -1,6 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { v4 as uuidv4 } from "uuid";
-import gameService from "../backend/game-service.js";
 import admin from "firebase-admin";
 import serviceAccount from "../backend/key.json" assert { type: "json" };
 

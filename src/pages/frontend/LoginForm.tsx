@@ -96,10 +96,10 @@ const LoginForm = () => {
       );
 
       const user = userCredential.user;
-      console.log("User logged in:", user);
+      // console.log("User logged in:", user);
 
       localStorage.setItem("user", JSON.stringify(user));
-      console.log(JSON.stringify(user));
+      // console.log(JSON.stringify(user));
 
       navigateToGame();
     } catch (error) {

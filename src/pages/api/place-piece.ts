@@ -53,11 +53,11 @@ const convertToObjectArray = (obj: Record<string, any>): number[][] => {
 };
 
 const convertToMapObject = (arr: number[][]): Record<string, number[]> => {
-    return arr.reduce((acc, currentArray, index) => {
-      acc[index.toString()] = currentArray;
-      return acc;
-    }, {} as Record<string, number[]>);
-  };
+  return arr.reduce((acc, currentArray, index) => {
+    acc[index.toString()] = currentArray;
+    return acc;
+  }, {} as Record<string, number[]>);
+};
 
 export default async function handler(
   req: NextApiRequest,
@@ -88,12 +88,9 @@ export default async function handler(
         convertedBoard
       );
 
-
-
-      // need to convert updatedBoard --> back into the mapping data structure in firestore 
+      // need to convert updatedBoard --> back into the mapping data structure in firestore
 
       const firestoreConvertedBoard = convertToMapObject(updatedBoard);
-
 
       await docRef.update({
         board: firestoreConvertedBoard,
@@ -117,13 +114,22 @@ export default async function handler(
         case 1:
           console.log("[POST] - the piece place is valid");
 
-        //   // switch player turns
-        //   await docRef.update({
-        //     playerTurn: playerTurn === 1 ? 2 : 1,
-        //   });
+          // switch player turns
+          await docRef.update({
+            playerTurn: playerTurn === 1 ? 2 : 1,
+          });
+
+          // Fetch the updated document
+          const updated2Doc = await docRef.get();
+
+          // Convert the document data into GameData format
+          const game2Data: GameData = {
+            id: updated2Doc.id,
+            ...(updated2Doc.data() as any),
+          };
 
           return res.status(200).json({
-            game: gameData,
+            game: game2Data,
             message: "[POST] - the piece place is valid",
             alreadyTaken: 0,
             isDoubleThree: 0,
