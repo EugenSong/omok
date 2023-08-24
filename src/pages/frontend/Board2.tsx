@@ -22,7 +22,7 @@ const Board2 = () => {
       .map(() => Array(BOARD_LEN).fill(""))
   );
 
-  const [text, setText] = useState("Player 1's Turn!"); // label state
+  const [text, setText] = useState("Press the 'Search For A Game' button to join/start a game."); // label state
   // player turn state to have label sync up with passing turn in the backend
   const [playerTurn, setPlayerTurnWithCallback] = useStateWithCallback(1);
   const [gameEnded, setGameEnded] = useState<boolean>(false);
