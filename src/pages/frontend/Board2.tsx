@@ -665,9 +665,15 @@ const Board2 = () => {
         </div>
 
         <div className={styles.labelandtable}>
-          <div className={styles.messagelabel}>
+          
+          {/* <div className={styles.messagelabel}>
             <Message message={text} />
-          </div>
+          </div> */}
+
+<>
+              <Message message={text} />
+              </>
+
           <div>
             <button
               className={styles.resetbutton}
