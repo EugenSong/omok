@@ -19,5 +19,5 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules", "./src/pages/backend/controller.js"]
+  "exclude": ["node_modules", "src/pages/backend/_controller.js"]
 }
