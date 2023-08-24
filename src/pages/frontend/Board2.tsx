@@ -22,14 +22,15 @@ const Board2 = () => {
       .map(() => Array(BOARD_LEN).fill(""))
   );
 
-  const [text, setText] = useState("Press the 'Search For A Game' button to join/start a game."); // label state
+  const [text, setText] = useState(
+    "Press the 'Search For A Game' button to join/start a game."
+  ); // label state
   // player turn state to have label sync up with passing turn in the backend
   const [playerTurn, setPlayerTurnWithCallback] = useStateWithCallback(1);
   const [gameEnded, setGameEnded] = useState<boolean>(false);
   // const [game, setGame] = useState(null); // state for curr game in localstorage
   const [game, setGameWithCallback] = useStateWithCallback(null); // this new game state wrapper replaced one above
   const [user, setUser] = useState(null); // state for curr user in localstorage
-
 
   // useEffect to track local storage "user" / existing "game" @ startup --> set as curr user and update board
   useEffect(() => {
@@ -57,7 +58,6 @@ const Board2 = () => {
 
     // case 1 - user but no local stored game (user is logged on but no existing game)
     if (currentUser && !currentGame) {
-
       console.log(
         "There IS a User but NO currentGame...waiting for User to perform an action."
       );
@@ -637,18 +637,56 @@ const Board2 = () => {
     return;
   };
 
-  // // updates board every 2 seconds -> emulate real-time effect
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     loadBoardFromFirebaseBackend();
-  //   }, 2000);
+  // updates board every 2 seconds -> emulate real-time effect
+  useEffect(() => {
+    const interval = setInterval(() => {
 
-  //   // Clean up interval on unmount
-  //   return () => {
-  //     console.log("Grid is unmounting...");
-  //     clearInterval(interval);
-  //   };
-  // }, []); // Empty array indicates that this effect does not depend on any values and will not re-run
+      console.log('interval spit'); 
+      // game is already in DB and cached -> pull up the game
+      const currentGameString = localStorage.getItem("game");
+      const currentGame = JSON.parse(currentGameString as string); // Parsing the string to JSON to use values
+      // JSON.parse(currentGameString as string) << TypeScript will recognize it as an any type.
+
+      const currentUserString = localStorage.getItem("user");
+      const currentUser = JSON.parse(currentUserString as string);
+
+      if (!currentGameString || !currentUserString) {
+        return;
+      }
+
+      const lookUpGame = async () => {
+        // look for existing game in db
+        const response = await fetch("/api/search-for-game-id", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user: currentUser.email, // curr client user
+            gameid: currentGame.board_uid, // game doc id
+          }),
+        });
+
+        // Check if the response is ok (status code in the range 200-299)
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+
+        // Parse the response body as JSON
+        const data = await response.json();
+        console.log("data in lookUpGame is: ", data.game);
+        setGameWithCallback(data.game);
+      };
+
+      lookUpGame();
+    }, 2000);
+
+    // Clean up interval on unmount
+    return () => {
+      console.log("Grid is unmounting...");
+      clearInterval(interval);
+    };
+  }, []); // Empty array indicates that this effect does not depend on any values and will not re-run
 
   return (
     <div>
@@ -665,14 +703,13 @@ const Board2 = () => {
         </div>
 
         <div className={styles.labelandtable}>
-          
           {/* <div className={styles.messagelabel}>
             <Message message={text} />
           </div> */}
 
-<>
-              <Message message={text} />
-              </>
+          <>
+            <Message message={text} />
+          </>
 
           <div>
             <button
