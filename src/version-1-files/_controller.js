@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import gameService from "./game-service.js";
+import gameService from "../pages/backend/game-service.js";
 
 // dotenv.config({ path: "src/pages/backend/.env" });
 
@@ -51,7 +51,7 @@ app.get("/board/checkwin", (req, res) => {
   } else if (gameService.checkForWinner(board, turn) === 2) {
     response = { winner: 0, message: "No winner. Game is a tie!", nextplayer: gameService.getOpponentsTurn(turn), isWon: 2 };
     console.log("[GET] - tie, no winner.");
-    
+
   } else {
     // if no win/tie, send next player's turn to frontend
     gameService.updatePlayerTurn(turn === 1 ? 2 : 1); // switch player turns
