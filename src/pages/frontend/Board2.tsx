@@ -676,6 +676,11 @@ const Board2 = () => {
           }),
         });
 
+        if (response.status === 404) {
+          console.log("No game found for this user.");
+          return; // or handle in any other way you prefer
+        }
+
         // Check if the response is ok (status code in the range 200-299)
         if (!response.ok) {
           throw new Error("Network response was not ok");
