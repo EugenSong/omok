@@ -74,6 +74,11 @@ const Board2 = () => {
       //     }),
       //   });
 
+      // if (response.status === 404) {
+      //  console.log('No game found for this user.');
+      //  return;  // or handle in any other way you prefer
+      // }
+
       //   // Check if the response is ok (status code in the range 200-299)
       //   if (!response.ok) {
       //     throw new Error("Network response was not ok");
@@ -130,6 +135,11 @@ const Board2 = () => {
             gameid: currentGame.board_uid, // game doc id
           }),
         });
+
+        if (response.status === 404) {
+          console.log("No game found for this user.");
+          return; // or handle in any other way you prefer
+        }
 
         // Check if the response is ok (status code in the range 200-299)
         if (!response.ok) {
@@ -640,8 +650,7 @@ const Board2 = () => {
   // updates board every 2 seconds -> emulate real-time effect
   useEffect(() => {
     const interval = setInterval(() => {
-
-      console.log('interval spit'); 
+      console.log("interval spit");
       // game is already in DB and cached -> pull up the game
       const currentGameString = localStorage.getItem("game");
       const currentGame = JSON.parse(currentGameString as string); // Parsing the string to JSON to use values

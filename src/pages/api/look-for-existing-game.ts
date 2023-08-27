@@ -88,7 +88,8 @@ export default async function handler(
           game: game,
         });
       } else {
-        console.log("No game found");
+        console.log("No game found.");
+        res.status(404).json({ message: "No game found." }); // Send a 404 response
       }
     } catch (error) {
       res.status(500).json({ message: "Something went wrong" });
