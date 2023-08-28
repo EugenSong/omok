@@ -380,16 +380,12 @@ const Board2 = () => {
 
       // Define an async function inside the useEffect
       const fetchCheckWin = async () => {
-
         // place here
         console.log("Starting delay...");
         await delay(5000); // This introduces a 5-second delay
         console.log("5 seconds have passed!");
 
-
         await checkWinInBackend();
-
-        
       };
 
       // Call the async function
@@ -702,7 +698,9 @@ const Board2 = () => {
         const data = await response.json();
         console.log("data in lookUpGame is: ", data.game);
         setGameWithCallback(data.game);
-        setText(`Player ${data.game.playerTurn}'s turn!`);
+        if (data.game.player1 && data.game.player2) {
+          setText(`Player ${data.game.playerTurn}'s turn!`);
+        }
       };
 
       lookUpGame();
