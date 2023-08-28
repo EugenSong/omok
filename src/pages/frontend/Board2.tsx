@@ -169,6 +169,10 @@ const Board2 = () => {
 
     const loggedInUser = localStorage.getItem("user");
 
+    // reset all states before searching for a game
+    setPlayerTurnWithCallback(1);
+    setGameEnded(false);
+
     if (!data.data.length) {
       try {
         // to have information about the logged-in user on the server-side, you'll have to send that information as part of the request >>> `body` param
@@ -376,7 +380,16 @@ const Board2 = () => {
 
       // Define an async function inside the useEffect
       const fetchCheckWin = async () => {
+
+        // place here
+        console.log("Starting delay...");
+        await delay(5000); // This introduces a 5-second delay
+        console.log("5 seconds have passed!");
+
+        
         await checkWinInBackend();
+
+        
       };
 
       // Call the async function
@@ -495,8 +508,8 @@ const Board2 = () => {
   }
 
   async function delay(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
 
   // async place piece - works ... took out playerPiece:number param since it exists in backend
   const placePieceIntoBackend = async (rowIndex: number, colIndex: number) => {
@@ -569,8 +582,6 @@ const Board2 = () => {
           setText(`Player ${updatedPlayerTurn}'s turn!`);
         });
 
-        
-
         // >>> CURRENT PROBLEM <<< : The result is that the logic dependent on the new state can be unpredictable.
         // SOLUTION: setGame() with a Callback function attached --> allows the checkWinInBackend() to run AFTER the re-render of setGame()
         setGameWithCallback(updatedBoard, () => {
@@ -579,11 +590,6 @@ const Board2 = () => {
             updatedBoard
           );
         });
-
-        // place here
-        console.log("Starting delay...");
-        await delay(5000); // This introduces a 5-second delay
-        console.log("5 seconds have passed!");
       }
 
       /* // BETTER, WORKING USING .THEN AND CALLBACK FUNCTION than above
@@ -598,7 +604,6 @@ const Board2 = () => {
 
     return;
   };
-
 
   // handle each player's piece in Grid
   const handleClick = async (rowIndex: number, colIndex: number) => {
@@ -701,7 +706,6 @@ const Board2 = () => {
       };
 
       lookUpGame();
-     
     }, 2000);
 
     // Clean up interval on unmount
