@@ -386,7 +386,7 @@ const Board2 = () => {
         await delay(5000); // This introduces a 5-second delay
         console.log("5 seconds have passed!");
 
-        
+
         await checkWinInBackend();
 
         
@@ -706,7 +706,7 @@ const Board2 = () => {
       };
 
       lookUpGame();
-    }, 2000);
+    }, 200);
 
     // Clean up interval on unmount
     return () => {
