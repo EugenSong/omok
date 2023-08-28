@@ -494,6 +494,10 @@ const Board2 = () => {
     return [state, setWithCallback];
   }
 
+  async function delay(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
   // async place piece - works ... took out playerPiece:number param since it exists in backend
   const placePieceIntoBackend = async (rowIndex: number, colIndex: number) => {
     try {
@@ -565,6 +569,8 @@ const Board2 = () => {
           setText(`Player ${updatedPlayerTurn}'s turn!`);
         });
 
+        
+
         // >>> CURRENT PROBLEM <<< : The result is that the logic dependent on the new state can be unpredictable.
         // SOLUTION: setGame() with a Callback function attached --> allows the checkWinInBackend() to run AFTER the re-render of setGame()
         setGameWithCallback(updatedBoard, () => {
@@ -573,6 +579,11 @@ const Board2 = () => {
             updatedBoard
           );
         });
+
+        // place here
+        console.log("Starting delay...");
+        await delay(5000); // This introduces a 5-second delay
+        console.log("5 seconds have passed!");
       }
 
       /* // BETTER, WORKING USING .THEN AND CALLBACK FUNCTION than above
@@ -588,10 +599,6 @@ const Board2 = () => {
     return;
   };
 
-  // ** RESET BOARD functionality does not make sense to have... either playing a game or doing nothing or waiting
-  // // resets omok board and player turn in backend and resets board in frontend
-  // const resetBoard = async () => {
-  // };
 
   // handle each player's piece in Grid
   const handleClick = async (rowIndex: number, colIndex: number) => {
