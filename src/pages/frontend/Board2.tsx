@@ -690,9 +690,11 @@ const Board2 = () => {
         const data = await response.json();
         console.log("data in lookUpGame is: ", data.game);
         setGameWithCallback(data.game);
+        setText(`Player ${data.game.playerTurn}'s turn!`);
       };
 
       lookUpGame();
+     
     }, 2000);
 
     // Clean up interval on unmount
