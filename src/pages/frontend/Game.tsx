@@ -48,12 +48,12 @@ const Game = () => {
       <main className={styles.main}>
         <h1>Omok - Connect 5</h1>
         <button
-          className={styles.resetbutton}
+          className={styles.logoutbutton}
           onClick={() => {
             handleLogout();
           }}
         >
-          logout
+          Log Out
         </button>
 
         <div>

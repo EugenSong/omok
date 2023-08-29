@@ -735,7 +735,7 @@ const Board2 = () => {
 
           <div>
             <button
-              className={styles.resetbutton}
+              className={styles.searchforbutton}
               onClick={() => searchForGames()}
             >
               Search For A Game
