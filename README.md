@@ -11,9 +11,13 @@
 - Node.js 
 - React 
 - Firebase 
+- Typescript
 
 ### Architecture: 
 - Client (frontend) - Server (backend) - Database 
 
 ### Assets:
 - [`Maplestory Wiki`](https://maplestory.wiki/)
+
+### Rules: 
+- [`Omok rules/How to play`](https://aeons.darkbb.com/t1048-spikeai-s-omok-strategy-guide)

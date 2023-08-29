@@ -172,6 +172,7 @@ const Board2 = () => {
     // reset all states before searching for a game
     setPlayerTurnWithCallback(1);
     setGameEnded(false);
+    localStorage.removeItem("game"); // rm individual key
 
     if (!data.data.length) {
       try {
@@ -728,10 +729,6 @@ const Board2 = () => {
         </div>
 
         <div className={styles.labelandtable}>
-          {/* <div className={styles.messagelabel}>
-            <Message message={text} />
-          </div> */}
-
           <>
             <Message message={text} />
           </>

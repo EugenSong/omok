@@ -138,7 +138,9 @@ const LoginForm = () => {
   return (
     <div className={styles.login}>
       <div>
-        <p>Login page.</p>
+
+        <h2>Create a random email id and password to log in</h2>
+        <h4>...email will be your player username</h4>
       </div>
 
       {/* Display error message - only displays when there is an error */}

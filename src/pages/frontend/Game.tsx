@@ -22,8 +22,6 @@ const Game = () => {
     }
   }, []);
 
-  
-
   const navigateToHome = () => {
     // one method to nav pages
     router.push("/frontend/LoginForm");
@@ -49,7 +47,8 @@ const Game = () => {
 
       <main className={styles.main}>
         <h1>Omok - Connect 5</h1>
-        <button className={styles.resetbutton}
+        <button
+          className={styles.resetbutton}
           onClick={() => {
             handleLogout();
           }}
@@ -57,10 +56,6 @@ const Game = () => {
           logout
         </button>
 
-      
-       
-
-  
         <div>
           <Board2 />
         </div>
