@@ -2,7 +2,7 @@
 
 ## Omok (5-in-a-row) demo
 
-<img src='https://github.com/EugenSong/gifs/blob/main/omok-demo1.gif' title='Omok demo1' alt='Omok demo1' />
+<img src='https://github.com/EugenSong/gifs/blob/main/omok-demo.gif' title='Omok demo1' alt='Omok demo1' />
 
 
 
